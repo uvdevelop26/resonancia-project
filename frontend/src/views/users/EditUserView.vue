@@ -1,34 +1,132 @@
 <script setup>
 import AppLayout from "@/components/layout/AppLayout.vue";
+import TextInput from "@/components/TextInput.vue";
+import SelectInput from "@/components/SelectInput.vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
 import { ref, onMounted } from "vue";
+import moment from "moment-timezone";
 
 const route = useRoute();
-const user = ref({});
+
+/*  data and message */
+const roles = ref(null);
+const ciudades = ref(null);
+const departamentos = ref(null);
 const message = ref("");
 
-onMounted(async () => {
-  const { id } = route.params;
+/* form edit */
+const form = ref({
+  id: "",
+  nombre: "",
+  apellidos: "",
+  slug: "",
+  dni: "",
+  telefono: "",
+  fecha_nacimiento: "",
+  edad: "",
+  sexo: "",
+  ciudade_id: "",
+  departamento_id: "",
+  direccion: "",
+  email: "",
+  role_id: "",
+  password: "",
+});
+
+/* functions */
+
+const getCurrentDptoId = (ciudades, ciudade_id) => {
+  const ciudad = ciudades.filter((ciudade) => ciudade.id === ciudade_id);
+  const departamentoId = ciudad[0].departamento_id;
+
+  return departamentoId;
+};
+
+const getFormattedDate = (date) => {
+  const formattedDate = moment(date).format("YYYY-MM-DD");
+  return formattedDate;
+};
+
+const slugify = () => {
+  const fullName = `${form.value.nombre} ${form.value.apellidos}`;
+  const slug = fullName
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-");
+
+  form.value.slug = slug;
+};
+
+
+
+/* fetch data */
+
+const fetchData = async () => {
+  const { slug } = route.params;
+
   try {
-    const response = await axios.get(`http://localhost:3000/api/users/${id}`);
-    user.value = response.data;
+    const response = await axios.get(
+      `http://localhost:3000/api/users/edit/${slug}`
+    );
+
+    /* get datas */
+
+    ciudades.value = response.data.ciudades;
+    departamentos.value = response.data.departamentos;
+    roles.value = response.data.roles;
+
+    const departamentoId = getCurrentDptoId(
+      ciudades.value,
+      response.data.persona.ciudade_id
+    );
+
+    const formattedDateBday = getFormattedDate(
+      response.data.persona.fecha_nacimiento
+    );
+
+    /* fill form */
+    form.value = {
+      id: response.data.user.id,
+      nombre: response.data.persona.nombre,
+      apellidos: response.data.persona.apellidos,
+      slug: response.data.user.slug,
+      dni: response.data.persona.dni,
+      telefono: response.data.persona.telefono,
+      fecha_nacimiento: formattedDateBday,
+      edad: response.data.persona.edad,
+      sexo: response.data.persona.sexo,
+      ciudade_id: response.data.persona.ciudade_id,
+      departamento_id: departamentoId,
+      direccion: response.data.persona.direccion,
+      email: response.data.user.email,
+      role_id: response.data.user.role_id,
+      password: "",
+    };
+
     message.value = response.data.message;
   } catch (error) {
     console.error("Error al cargar el usuario:", error);
     message.value = error.response.data.message || "Error al crear el usuario";
   }
-});
+
+};
 
 const updateUser = async () => {
   try {
-    const { id } = route.params;
-    await axios.put(`http://localhost:3000/api/users/${id}`, user.value);
-    message.value = "Usuario Actualizado Correctamente"
+    const { slug } = route.params;
+    const response = await axios.put(`http://localhost:3000/api/users/update/${slug}`, form.value);
+    message.value = response.data.message;
+    fetchData();
   } catch (error) {
-    console.error("Error al actualizar el usuario:", error);
+    console.error(error);
   }
 };
+
+onMounted(fetchData);
 </script>
 <template>
   <AppLayout :title="`Editar Usuario`">
@@ -38,193 +136,124 @@ const updateUser = async () => {
         <div class="w-full rounded-lg bg-white shadow-md p-4 mt-4">
           <form @submit.prevent="updateUser" class="flex flex-col gap-4">
             <div
-              class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap"
-            >
-              <div class="flex flex-col gap-1">
-                <label
-                  for="nombre"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Nombre:
-                </label>
-                <input
-                  type="text"
-                  name="nombre"
-                  v-model="user.nombre"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="apellido"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Apellido:
-                </label>
-                <input
-                  type="text"
-                  name="apellido"
-                  v-model="user.apellidos"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="dni"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  DNI:
-                </label>
-                <input
-                  type="text"
-                  name="dni"
-                  v-model="user.dni"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="telefono"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Teléfono:
-                </label>
-                <input
-                  type="text"
-                  name="telefono"
-                  v-model="user.telefono"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="fecha_nacimiento"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Fecha de Nacimiento:
-                </label>
-                <input
-                  type="date"
-                  name="fecha_nacimiento"
-                  v-model="user.fecha_nacimiento"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="edad"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Edad:
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="100"
-                  name="edad"
-                  v-model="user.edad"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="sexo"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Sexo:
-                </label>
-                <input
-                  type="text"
-                  name="sexo"
-                  v-model="user.sexo"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="departamento"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Departamento:
-                </label>
-                <select
-                  id="departamento"
-                  name="departamento"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                  v-model="user.departamento_id">
+              class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap">
+              <TextInput
+                class="hidden"
+                label="Nombre"
+                type="text"
+                id="nombre"
+                v-model="form.id"
+              />
+              <TextInput
+                label="Nombre"
+                type="text"
+                id="nombre"
+                v-model="form.nombre"
+                @input="slugify()"
+              />
+              <TextInput
+                label="Apellidos"
+                type="text"
+                id="apellidos"
+                v-model="form.apellidos"
+                @input="slugify()"
+              />
+              <TextInput
+                label="Slug"
+                type="text"
+                id="slug"
+                v-model="form.slug"
+                disabled="true"
+              />
+              <TextInput label="DNI" type="text" id="dni" v-model="form.dni" />
+              <TextInput
+                label="Teléfono"
+                type="text"
+                id="telefono"
+                v-model="form.telefono"
+              />
+              <TextInput
+                label="Fecha de Nacimiento"
+                type="date"
+                id="fecha_nacimiento"
+                v-model="form.fecha_nacimiento"
+              />
+              <TextInput
+                label="Edad"
+                type="number"
+                id="edad"
+                min="1"
+                max="100"
+                v-model="form.edad"
+              />
+              <SelectInput label="Sexo" id="sexo" v-model="form.sexo">
+                <template #options>
                   <option :value="null"></option>
-                  <option value="1" class="cursor-pointer">Guaira</option>
-                </select>
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="ciudad"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Ciudad:
-                </label>
-                <select
-                  id="ciudad"
-                  name="ciudad"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                  v-model="user.ciudade_id">
+                  <option value="femenino">Femenino</option>
+                  <option value="Masculino">Masculino</option>
+                </template>
+              </SelectInput>
+              <SelectInput
+                label="Departamento"
+                id="departamento_id"
+                v-model="form.departamento_id">
+                <template #options>
                   <option :value="null"></option>
-                  <option value="1" class="cursor-pointer">Troche</option>
-                </select>
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="direccion"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Dirección:
-                </label>
-                <input
-                  type="text"
-                  name="direccion"
-                  v-model="user.direccion"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="correo"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Correo:
-                </label>
-                <input
-                  type="email"
-                  name="correo"
-                  v-model="user.email"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="password"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Contraseña:
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  v-model="user.password"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="rol"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  rol:
-                </label>
-                <select
-                  id="rol"
-                  name="rol"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                  v-model="user.role_id">
-                  <option :value="null"></option>
-                  <option value="1" class="cursor-pointer">
-                    Administrador
+                  <option
+                    v-for="departamento in departamentos"
+                    :key="departamento.id"
+                    :value="departamento.id">
+                    {{ departamento.nombre }}
                   </option>
-                </select>
-              </div>
+                </template>
+              </SelectInput>
+              <SelectInput
+                label="Ciudad"
+                id="ciudade_id"
+                v-model="form.ciudade_id">
+                <template #options>
+                  <option :value="null"></option>
+                  <option
+                    v-for="ciudade in ciudades"
+                    :key="ciudade.id"
+                    :value="ciudade.id">
+                    {{ ciudade.nombre }}
+                  </option>
+                </template>
+              </SelectInput>
+              <TextInput
+                label="Dirección"
+                type="text"
+                id="direccion"
+                v-model="form.direccion"
+              />
+              <TextInput
+                label="Correo"
+                type="email"
+                id="email"
+                v-model="form.email"
+              />
+              <TextInput
+                label="Contraseña"
+                type="password"
+                id="password"
+                placeholder="Déjala en blanco si no deseas cambiarla"
+                v-model="form.password"
+              />
+              <SelectInput label="Rol" id="role_id" v-model="form.role_id">
+                <template #options>
+                  <option :value="null"></option>
+                  <option v-for="role in roles" :key="role.id" :value="role.id">
+                    {{ role.nombre }}
+                  </option>
+                </template>
+              </SelectInput>
+              <button
+                type="submit"
+                class="h-10 w-72 bg-primary text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8">
+                Agregar
+              </button>
             </div>
-            <button
-              type="submit"
-              class="h-10 w-72 bg-primary text-white shadow font-bold rounded-lg text-sm md:mx-auto hover:bg-primary-light hover:text-primary">
-              Actualizar
-            </button>
           </form>
         </div>
       </div>

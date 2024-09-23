@@ -20,9 +20,10 @@ const fetchUsers = async () => {
 
 const deleteUser = async (userId) => {
   try {
-    await axios.delete(`http://localhost:3000/api/users/${userId}`);
+    await axios.delete(`http://localhost:3000/api/users/delete/${userId}`);
     // Filtra el usuario eliminado de la lista de usuarios
     users.value = users.value.filter((user) => user.id !== userId);
+    
   } catch (error) {
     console.error("Error al eliminar el usuario:", error);
   }
@@ -40,8 +41,7 @@ onMounted(() => {
         <div class="w-full flex justify-end items-center mt-4">
           <router-link
             to="/users/create"
-            class="w-28 h-8 text-white font-bold bg-primary flex items-center justify-center rounded-md shadow-lg hover:bg-primary-light hover:text-primary hover:border"
-          >
+            class="w-28 h-8 text-white font-bold bg-primary flex items-center justify-center rounded-md shadow-lg hover:bg-primary-light hover:text-primary hover:border">
             Crear
           </router-link>
         </div>
@@ -66,10 +66,6 @@ onMounted(() => {
                 <th
                   class="py-3 px-4 text-gray-500 text-xs md:text-sm font-bold">
                   CI
-                </th>
-                <th
-                  class="py-3 px-4 text-gray-500 text-xs md:text-sm font-bold">
-                  Teléfono
                 </th>
                 <th
                   class="py-3 px-4 text-gray-500 text-xs md:text-sm font-bold">
@@ -107,10 +103,6 @@ onMounted(() => {
                 </td>
                 <td
                   class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100">
-                  {{ user.telefono }}
-                </td>
-                <td
-                  class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100">
                   {{ user.email }}
                 </td>
                 <td
@@ -122,7 +114,7 @@ onMounted(() => {
                   <div
                     class="w-full h-full flex items-center justify-center gap-2">
                     <router-link
-                      :to="`/users/edit/${user.id}`"
+                      :to="`/users/edit/${user.slug}`"
                       class="inline-block border bg-primary-light px-3 py-3 rounded-full bg-light-green-two hover:shadow-md">
                       <Edit class="w-3 h-3 fill-primary" />
                     </router-link>

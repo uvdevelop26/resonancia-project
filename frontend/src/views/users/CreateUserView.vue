@@ -1,11 +1,15 @@
 <script setup>
 import AppLayout from "@/components/layout/AppLayout.vue";
+import TextInput from "@/components/TextInput.vue";
+import SelectInput from "@/components/SelectInput.vue";
 import axios from "axios";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 
+/* create form */
 const form = ref({
   nombre: "",
   apellidos: "",
+  slug: "",
   dni: "",
   telefono: "",
   fecha_nacimiento: "",
@@ -19,23 +23,63 @@ const form = ref({
   password: "",
 });
 
+const cleanForm = () => {
+  for (let clave in form.value) {
+    form.value[clave] = "";
+  }
+};
+
+const slugify = () => {
+  const fullName = `${form.value.nombre} ${form.value.apellidos}`;
+  const slug = fullName
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\-]+/g, "")
+    .replace(/\-\-+/g, "-");
+
+  form.value.slug = slug;
+};
+
+/* to show in the select input */
+const departamentos = ref(null);
+const ciudades = ref(null);
+const roles = ref(null);
+
 const message = ref("");
 
+/* create new user */
 const createUser = async () => {
   try {
     const response = await axios.post(
-      "http://localhost:3000/api/users/create",
+      "http://localhost:3000/api/users/store",
       form.value
     );
 
     message.value = response.data.message;
 
-    /*  cleanForm(); */
+    cleanForm();
   } catch (error) {
     console.error("Error al crear el usuario:", error);
     message.value = error.response.data.message || "Error al crear el usuario";
   }
 };
+
+/* Resquest data from the server */
+const fechData = async () => {
+  try {
+    const response = await axios.get("http://localhost:3000/api/users/create");
+
+    departamentos.value = response.data.departamentos;
+    ciudades.value = response.data.ciudades;
+    roles.value = response.data.roles;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+onMounted(fechData);
 </script>
 <template>
   <AppLayout :title="`Crear Usuarios`">
@@ -46,191 +90,115 @@ const createUser = async () => {
           <form @submit.prevent="createUser" class="flex flex-col gap-4">
             <div
               class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap">
-              <div class="flex flex-col gap-1">
-                <label
-                  for="nombre"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Nombre:
-                </label>
-                <input
-                  type="text"
-                  name="nombre"
-                  v-model="form.nombre"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="apellido"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Apellido:
-                </label>
-                <input
-                  type="text"
-                  name="apellido"
-                  v-model="form.apellidos"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="dni"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  DNI:
-                </label>
-                <input
-                  type="text"
-                  name="dni"
-                  v-model="form.dni"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="telefono"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Teléfono:
-                </label>
-                <input
-                  type="text"
-                  name="telefono"
-                  v-model="form.telefono"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="fecha_nacimiento"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Fecha de Nacimiento:
-                </label>
-                <input
-                  type="date"
-                  name="fecha_nacimiento"
-                  v-model="form.fecha_nacimiento"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="edad"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Edad:
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="100"
-                  name="edad"
-                  v-model="form.edad"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="sexo"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Sexo:
-                </label>
-                <input
-                  type="text"
-                  name="sexo"
-                  v-model="form.sexo"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="departamento"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Departamento:
-                </label>
-                <select
-                  id="departamento"
-                  name="departamento"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                  v-model="form.departamento_id">
+              <TextInput
+                label="Nombre"
+                type="text"
+                id="nombre"
+                v-model="form.nombre"
+                @input="slugify()"
+              />
+              <TextInput
+                label="Apellidos"
+                type="text"
+                id="apellidos"
+                v-model="form.apellidos"
+                @input="slugify()"
+              />
+              <TextInput
+                label="Slug"
+                type="text"
+                id="slug"
+                v-model="form.slug"
+                disabled="true"
+              />
+              <TextInput label="DNI" type="text" id="dni" v-model="form.dni" />
+              <TextInput
+                label="Teléfono"
+                type="text"
+                id="telefono"
+                v-model="form.telefono"
+              />
+              <TextInput
+                label="Fecha de Nacimiento"
+                type="date"
+                id="fecha_nacimiento"
+                v-model="form.fecha_nacimiento"
+              />
+              <TextInput
+                label="Edad"
+                type="number"
+                id="edad"
+                min="1"
+                max="100"
+                v-model="form.edad"
+              />
+              <SelectInput label="Sexo" id="sexo" v-model="form.sexo">
+                <template #options>
                   <option :value="null"></option>
-                  <option value="1" class="cursor-pointer">Guaira</option>
-                </select>
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="ciudad"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Ciudad:
-                </label>
-                <select
-                  id="ciudad"
-                  name="ciudad"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                  v-model="form.ciudade_id">
+                  <option value="femenino">Femenino</option>
+                  <option value="Masculino">Masculino</option>
+                </template>
+              </SelectInput>
+              <SelectInput
+                label="Departamento"
+                id="departamento_id"
+                v-model="form.departamento_id">
+                <template #options>
                   <option :value="null"></option>
-                  <option value="1" class="cursor-pointer">Troche</option>
-                </select>
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="direccion"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Dirección:
-                </label>
-                <input
-                  type="text"
-                  name="direccion"
-                  v-model="form.direccion"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="correo"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Correo:
-                </label>
-                <input
-                  type="email"
-                  name="correo"
-                  v-model="form.email"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="password"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  Contraseña:
-                </label>
-                <input
-                  type="password"
-                  name="password"
-                  v-model="form.password"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                />
-              </div>
-              <div class="flex flex-col gap-1">
-                <label
-                  for="rol"
-                  class="text-gray-500 text-xs md:text-sm font-bold">
-                  rol:
-                </label>
-                <select
-                  id="rol"
-                  name="rol"
-                  class="h-10 w-72 px-2 bg-primary-light shadow rounded-lg text-sm text-primary"
-                  v-model="form.role_id">
-                  <option :value="null"></option>
-                  <option value="1" class="cursor-pointer">
-                    Administrador
+                  <option
+                    v-for="departamento in departamentos"
+                    :key="departamento.id"
+                    :value="departamento.id">
+                    {{ departamento.nombre }}
                   </option>
-                </select>
-              </div>
+                </template>
+              </SelectInput>
+              <SelectInput
+                label="Ciudad"
+                id="ciudade_id"
+                v-model="form.ciudade_id">
+                <template #options>
+                  <option :value="null"></option>
+                  <option
+                    v-for="ciudade in ciudades"
+                    :key="ciudade.id"
+                    :value="ciudade.id">
+                    {{ ciudade.nombre }}
+                  </option>
+                </template>
+              </SelectInput>
+              <TextInput
+                label="Dirección"
+                type="text"
+                id="direccion"
+                v-model="form.direccion"
+              />
+              <TextInput
+                label="Correo"
+                type="email"
+                id="email"
+                v-model="form.email"
+              />
+              <TextInput
+                label="Contraseña"
+                type="password"
+                id="password"
+                v-model="form.password"
+              />
+              <SelectInput label="Rol" id="role_id" v-model="form.role_id">
+                <template #options>
+                  <option :value="null"></option>
+                  <option v-for="role in roles" :key="role.id" :value="role.id">
+                    {{ role.nombre }}
+                  </option>
+                </template>
+              </SelectInput>
+              <button
+                type="submit"
+                class="h-10 w-72 bg-primary text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8">
+                Agregar
+              </button>
             </div>
-            <button
-              type="submit"
-              class="h-10 w-72 bg-primary text-white shadow font-bold rounded-lg text-sm md:mx-auto hover:bg-primary-light hover:text-primary">
-              Agregar
-            </button>
           </form>
         </div>
       </div>

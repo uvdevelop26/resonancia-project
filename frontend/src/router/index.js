@@ -1,24 +1,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import Login from '@/views/Login.vue'
 import DashboardView from "@/views/DashboardView.vue"
-import UserView from "@/views/UserView.vue"
+import UserView from "@/views/users/UserView.vue"
 import CreateUserView from '@/views/users/CreateUserView.vue'
 import EditUserView from '@/views/users/EditUserView.vue'
 
-/* import Dashboard from '@/views/Dashboard.vue'
-import Capturar from '@/views/Capturar.vue';
-import userIndex from '@/views/users/userIndex.vue'
-import roleIndex from '@/views/roles/roleIndex.vue';
-import fincaIndex from '@/views/fincas/fincaIndex.vue'
-import cultivoIndex from '@/views/cultivos/cultivoIndex.vue'
-import CreateUser from "@/views/users/CreateUser.vue"
-import CreateRole from '@/views/roles/CreateRole.vue'
-import CreateFinca from '@/views/fincas/CreateFinca.vue'
-import CreateCultivo from '@/views/cultivos/CreateCultivo.vue'
-import EditUser from "@/views/users/EditUser.vue"
-import EditRole from "@/views/roles/EditRole.vue"
-import EditFinca from "@/views/fincas/EditFinca.vue"
-import EditCultivo from "@/views/cultivos/EditCultivo.vue" */
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,9 +32,9 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
-      path: '/users/edit/:id',
+      path: '/users/edit/:slug',
       name: 'EditUser',
-      component: EditUserView, // Carga la vista de edición de usuario
+      component: EditUserView, 
       meta: { requiresAuth: true },
     },
 
