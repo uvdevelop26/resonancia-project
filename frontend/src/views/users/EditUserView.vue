@@ -251,7 +251,7 @@ onMounted(fetchData);
               <button
                 type="submit"
                 class="h-10 w-72 bg-primary text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8">
-                Agregar
+                Editar
               </button>
             </div>
           </form>

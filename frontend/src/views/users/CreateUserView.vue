@@ -23,6 +23,8 @@ const form = ref({
   password: "",
 });
 
+const errors = ref({});
+
 const cleanForm = () => {
   for (let clave in form.value) {
     form.value[clave] = "";
@@ -61,8 +63,23 @@ const createUser = async () => {
 
     cleanForm();
   } catch (error) {
-    console.error("Error al crear el usuario:", error);
-    message.value = error.response.data.message || "Error al crear el usuario";
+    if (error.response) {
+      const errorObject = error.response.data.errors || [];
+
+      const newObjectError = {};
+
+      errorObject.forEach((err) => {
+        const path = err.path;
+
+        if (!newObjectError[path]) {
+          newObjectError[path] = [];
+        }
+
+        newObjectError[path].push(err);
+      });
+
+      errors.value = newObjectError;
+    }
   }
 };
 
@@ -89,11 +106,13 @@ onMounted(fechData);
         <div class="w-full rounded-lg bg-white shadow-md p-4 mt-4">
           <form @submit.prevent="createUser" class="flex flex-col gap-4">
             <div
-              class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap">
+              class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap"
+            >
               <TextInput
                 label="Nombre"
                 type="text"
                 id="nombre"
+                :error="errors.nombre"
                 v-model="form.nombre"
                 @input="slugify()"
               />
@@ -101,6 +120,7 @@ onMounted(fechData);
                 label="Apellidos"
                 type="text"
                 id="apellidos"
+                :error="errors.apellidos"
                 v-model="form.apellidos"
                 @input="slugify()"
               />
@@ -108,20 +128,29 @@ onMounted(fechData);
                 label="Slug"
                 type="text"
                 id="slug"
+                :error="errors.slug"
                 v-model="form.slug"
                 disabled="true"
               />
-              <TextInput label="DNI" type="text" id="dni" v-model="form.dni" />
+              <TextInput
+                label="DNI"
+                type="text"
+                id="dni"
+                :error="errors.slug"
+                v-model="form.dni"
+              />
               <TextInput
                 label="Teléfono"
                 type="text"
                 id="telefono"
+                :error="errors.telefono"
                 v-model="form.telefono"
               />
               <TextInput
                 label="Fecha de Nacimiento"
                 type="date"
                 id="fecha_nacimiento"
+                :error="errors.fecha_nacimiento"
                 v-model="form.fecha_nacimiento"
               />
               <TextInput
@@ -130,9 +159,10 @@ onMounted(fechData);
                 id="edad"
                 min="1"
                 max="100"
+                :error="errors.edad"
                 v-model="form.edad"
               />
-              <SelectInput label="Sexo" id="sexo" v-model="form.sexo">
+              <SelectInput label="Sexo" id="sexo" :error="errors.sexo" v-model="form.sexo">
                 <template #options>
                   <option :value="null"></option>
                   <option value="femenino">Femenino</option>
@@ -142,13 +172,16 @@ onMounted(fechData);
               <SelectInput
                 label="Departamento"
                 id="departamento_id"
-                v-model="form.departamento_id">
+                :error="form.departamento_id"
+                v-model="form.departamento_id"
+              >
                 <template #options>
                   <option :value="null"></option>
                   <option
                     v-for="departamento in departamentos"
                     :key="departamento.id"
-                    :value="departamento.id">
+                    :value="departamento.id"
+                  >
                     {{ departamento.nombre }}
                   </option>
                 </template>
@@ -156,13 +189,16 @@ onMounted(fechData);
               <SelectInput
                 label="Ciudad"
                 id="ciudade_id"
-                v-model="form.ciudade_id">
+                :error="errors.ciudade_id"
+                v-model="form.ciudade_id"
+              >
                 <template #options>
                   <option :value="null"></option>
                   <option
                     v-for="ciudade in ciudades"
                     :key="ciudade.id"
-                    :value="ciudade.id">
+                    :value="ciudade.id"
+                  >
                     {{ ciudade.nombre }}
                   </option>
                 </template>
@@ -171,21 +207,24 @@ onMounted(fechData);
                 label="Dirección"
                 type="text"
                 id="direccion"
+                :error="errors.direccion"
                 v-model="form.direccion"
               />
               <TextInput
                 label="Correo"
                 type="email"
                 id="email"
+                :error="errors.email"
                 v-model="form.email"
               />
               <TextInput
                 label="Contraseña"
                 type="password"
                 id="password"
+                :error="errors.password"
                 v-model="form.password"
               />
-              <SelectInput label="Rol" id="role_id" v-model="form.role_id">
+              <SelectInput label="Rol" id="role_id" :error="errors.role_id" v-model="form.role_id">
                 <template #options>
                   <option :value="null"></option>
                   <option v-for="role in roles" :key="role.id" :value="role.id">
@@ -195,7 +234,8 @@ onMounted(fechData);
               </SelectInput>
               <button
                 type="submit"
-                class="h-10 w-72 bg-primary text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8">
+                class="h-10 w-72 bg-primary text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8"
+              >
                 Agregar
               </button>
             </div>

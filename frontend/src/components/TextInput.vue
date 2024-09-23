@@ -8,7 +8,7 @@ const props = defineProps({
   id: String,
   disabled: Boolean,
   placeholder: String,
-  error: Object,
+  error: Array,
   min: Number,
   max: Number,
 });
@@ -18,6 +18,11 @@ defineEmits(["update:modelValue"]);
 const disabledClasses = computed(() => {
   return props.disabled ? "bg-gray-200 border-b-gray-300" : "";
 });
+
+const errorClasess = computed(() => {
+  return props.error ? "border-b-red-500" : "";
+});
+
 </script>
 <template>
   <div class="flex flex-col gap-2">
@@ -25,7 +30,7 @@ const disabledClasses = computed(() => {
     <input
       :type="type"
       class="h-9 w-72 px-2 text-sm text-primary bg-gray-100 border-b placeholder:text-xs placeholder:italic focus:outline-none md:w-[17rem]"
-      :class="disabledClasses"
+      :class="[disabledClasses, errorClasess]"
       :id="id"
       :value="modelValue"
       :placeholder="placeholder"
@@ -35,8 +40,8 @@ const disabledClasses = computed(() => {
       autocomplete="off"
       :disabled="disabled"
     />
+    <div v-if="error" class="text-xs text-red-500">{{ error[0].msg }}</div>
   </div>
-  <div v-if="error" class="text-xs font-bold text-red-500"></div>
 </template>
 
 <style lang="scss" scoped></style>

@@ -15,10 +15,6 @@ const form = ref({
 const errors = ref({});
 const message = ref("");
 
-const getFieldErrorClass = (field) => {
-  return errors.value && errors.value[field] ? "border-red-500" : "";
-};
-
 // Función para iniciar sesión
 const login = async () => {
   try {
@@ -35,25 +31,21 @@ const login = async () => {
 
     router.push("/dashboard");
   } catch (error) {
-    if (error) {
+    if (error.response) {
       const errorObject = error.response.data.errors || [];
 
-      const newErrorObject = [];
+      const newErrorObject = {};
 
-      errorObject.forEach((err, index) => {
+      errorObject.forEach((err) => {
         const path = err.path;
-
-        if(path === err.path){
-          
+      
+        if (!newErrorObject[path]) {
+          newErrorObject[path] = [];
         }
-
-        newErrorObject[index] = { path: path, message: err.message };
-        
+        newErrorObject[path].push(err);
       });
 
       errors.value = newErrorObject;
-
-      console.log(errors.value)
     }
 
     message.value = "";
@@ -64,23 +56,18 @@ const login = async () => {
 
 <template>
   <div
-    class="w-full h-full bg-primary flex items-end relative md:items-center md:justify-center"
-  >
+    class="w-full h-full bg-primary flex items-end relative md:items-center md:justify-center">
     <div
-      class="w-full flex flex-col md:flex-row md:w-auto md:rounded-2xl overflow-hidden md:shadow-2xl"
-    >
+      class="w-full flex flex-col md:flex-row md:w-auto md:rounded-2xl overflow-hidden md:shadow-2xl">
       <div
-        class="h-52 md:h-auto flex items-center justify-center md:w-72 md:flex-1 md:bg-primary-light"
-      >
+        class="h-52 md:h-auto flex items-center justify-center md:w-72 md:flex-1 md:bg-primary-light">
         <div
-          class="p-3 bg-white rounded-tl-xl rounded-bl-xl rounded-br-xl md:bg-primary"
-        >
+          class="p-3 bg-white rounded-tl-xl rounded-bl-xl rounded-br-xl md:bg-primary">
           <Logo class="w-12 h-12 fill-primary md:fill-white" />
         </div>
       </div>
       <div
-        class="bg-white h-[25rem] pt-8 px-4 rounded-tl-[6rem] flex flex-col items-center md:rounded-tl-none md:flex-1 md:px-6"
-      >
+        class="bg-white h-[25rem] pt-8 px-4 rounded-tl-[6rem] flex flex-col items-center md:rounded-tl-none md:flex-1 md:px-6">
         <h1 class="text-2xl font-bold text-primary italic">Login</h1>
         <form @submit.prevent="login" class="flex flex-col pt-4">
           <TextInput
@@ -100,21 +87,11 @@ const login = async () => {
             v-model="form.password"
             :error="errors.password"
           />
-
-          <!--  <div v-if="errors" class="text-xs text-red-500 italic">
-            <div>{{ errors.email[0] }}</div>
-          </div> -->
-
-          <!-- <div v-if="errors" class="text-xs text-red-500 italic">
-            <div>{{ errors.password[0] }}</div>
-          </div> -->
           <div
-            class="mt-8 h-10 w-full overflow-hidden rounded-lg bg-primary shadow-md group hover:bg-primary-light"
-          >
+            class="mt-8 h-10 w-full overflow-hidden rounded-lg bg-primary shadow-md group hover:bg-primary-light">
             <button
               type="submit"
-              class="w-full h-full text-white font-bold hover:text-primary"
-            >
+              class="w-full h-full text-white font-bold hover:text-primary">
               Ingresar
             </button>
           </div>

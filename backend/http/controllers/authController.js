@@ -1,12 +1,9 @@
 const Auth = require('../../models/auth');
-const authValidation = require('../validators/authValidation');
 
 const authController = {
     login: async (req, res) => {
 
         const { email, password } = req.body;
-
-        authValidation
 
         try {
 
