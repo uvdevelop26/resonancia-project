@@ -133,7 +133,7 @@ onMounted(fetchData);
     <template #content>
       <div class="w-full h-full overflow-y-auto flex flex-col gap-5">
         <!-- form -->
-        <div class="w-full rounded-lg bg-white shadow-md p-4 mt-4">
+        <div class="w-full rounded-lg bg-white shadow-md p-4 lg:p-6 mt-4">
           <form @submit.prevent="updateUser" class="flex flex-col gap-4">
             <div
               class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap">

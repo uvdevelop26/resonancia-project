@@ -103,11 +103,10 @@ onMounted(fechData);
     <template #content>
       <div class="w-full h-full overflow-y-auto flex flex-col gap-5">
         <!-- form -->
-        <div class="w-full rounded-lg bg-white shadow-md p-4 mt-4">
+        <div class="w-full rounded-lg bg-white shadow-md p-4 lg:p-6 mt-4">
           <form @submit.prevent="createUser" class="flex flex-col gap-4">
             <div
-              class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap"
-            >
+              class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap">
               <TextInput
                 label="Nombre"
                 type="text"
@@ -136,7 +135,7 @@ onMounted(fechData);
                 label="DNI"
                 type="text"
                 id="dni"
-                :error="errors.slug"
+                :error="errors.dni"
                 v-model="form.dni"
               />
               <TextInput
@@ -172,7 +171,6 @@ onMounted(fechData);
               <SelectInput
                 label="Departamento"
                 id="departamento_id"
-                :error="form.departamento_id"
                 v-model="form.departamento_id"
               >
                 <template #options>

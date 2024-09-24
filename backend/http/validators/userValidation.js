@@ -13,13 +13,13 @@ const userValidation = {
         /* dni */
         check('dni', 'El campo dni es obligatorio').notEmpty(),
         check('dni', 'El campo dni no debe tener más de 20 caracteres').isLength({ max: 20 }),
-        check('dni').custom(async (value) => {
+       /*  check('dni').custom(async (value) => {
             const existingDni = await db.Persona.findOne({ where: { dni: value } });
             if (existingDni) {
                 throw new Error('El dni ya está registrado');
             }
             return true;
-        }),
+        }), */
         /* telefono */
         check('telefono', 'El campo teléfono no debe tener más de 20 caracteres').isLength({ max: 20 }),
 

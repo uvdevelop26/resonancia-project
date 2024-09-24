@@ -4,6 +4,7 @@ import DashboardView from "@/views/DashboardView.vue"
 import UserView from "@/views/users/UserView.vue"
 import CreateUserView from '@/views/users/CreateUserView.vue'
 import EditUserView from '@/views/users/EditUserView.vue'
+import Camara from '@/views/analisis/Camara.vue'
 
 
 const router = createRouter({
@@ -37,6 +38,15 @@ const router = createRouter({
       component: EditUserView, 
       meta: { requiresAuth: true },
     },
+
+    /* camara */
+    {
+      path: '/analisis',
+      name: 'analisis',
+      component: Camara,
+      meta: { requiresAuth: true },
+    },
+    
 
     /* users */
 

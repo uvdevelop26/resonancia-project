@@ -90,10 +90,13 @@ const openSubmenu = ref(false);
             <Home class="w-7 h-7 fill-white" />
           </router-link>
         </div>
-        <div class="w-full h-full lg:h-20">
-          <a class="w-full h-full flex items-center justify-center">
+        <div class="w-full h-full lg:h-20 relative"
+        :class="isActive('/analisis') ? activeClasess : ''">
+          <router-link 
+          to="/analisis"
+          class="w-full h-full flex items-center justify-center">
             <Camara class="w-7 h-7 fill-white" />
-          </a>
+          </router-link>
         </div>
         <div
           class="w-full h-full lg:h-20 relative"
