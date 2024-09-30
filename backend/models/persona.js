@@ -20,6 +20,24 @@ const Persona = {
 
     },
 
+    /* get Persona by dni */
+
+    async getPersonaByDni(dni) {
+        const query = `SELECT * FROM personas WHERE dni = ?`;
+
+        return new Promise((resolve, reject) => {
+            db.query(query, [dni], (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                return resolve(result[0]);
+
+            });
+        });
+    },
+
+
     /* Create Persona */
 
     async createPersona({ nombre, apellidos, dni, telefono, fecha_nacimiento, sexo, direccion, edad, user_id, ciudade_id }) {
@@ -51,7 +69,7 @@ const Persona = {
             });
         });
     }
-    
+
 
 }
 

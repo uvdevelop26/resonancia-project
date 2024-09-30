@@ -11,14 +11,18 @@ router.get('/users', userController.userIndex);
 router.get('/users/create', userController.userCreate);
 
 router.post('/users/store',
-    userValidation.checkValidity,
+    userValidation.store,
     userValidation.handleValidationErrors,
     userController.userStore
 );
 
 router.get('/users/edit/:slug', userController.userEdit);
 
-router.put('/users/update/:slug', userController.userUpdate);
+router.put('/users/update/:id',
+    userValidation.update,
+    userValidation.handleValidationErrors,
+    userController.userUpdate
+);
 
 router.delete('/users/delete/:id', userController.userDelete);
 

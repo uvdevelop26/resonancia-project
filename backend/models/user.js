@@ -41,6 +41,23 @@ const User = {
 
     },
 
+    /* get User by email  */
+
+    async getUserByEmail(email) {
+        const query = `SELECT * FROM users WHERE email = ?`;
+
+        return new Promise((resolve, reject) => {
+            db.query(query, [email], (err, result) => {
+                if (err) {
+                    return reject(err);
+                }
+
+                return resolve(result[0]);
+
+            });
+        });
+    },
+
     /* Insertar Usuario */
 
     async createUser({ email, hashedPassword, role_id, slug }) {
@@ -83,17 +100,17 @@ const User = {
 
     async deleteUser(id) {
         const query = `DELETE FROM users WHERE id = ?`;
-    
+
         return new Promise((resolve, reject) => {
             db.query(query, [id], (err, result) => {
                 if (err) {
                     return reject(err);
                 }
-    
+
                 if (result.affectedRows === 0) {
                     return reject(new Error("El usuario no existe o ya ha sido eliminado"));
                 }
-    
+
                 return resolve(true);
             });
         });

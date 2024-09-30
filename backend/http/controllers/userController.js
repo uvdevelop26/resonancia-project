@@ -36,18 +36,6 @@ const userController = {
             const departamentos = await Departamento.getDepartamentos(req, res);
             const ciudades = await Ciudade.getCiudades(req, res);
 
-            if (!roles) {
-                return req.status(400).json({ msg: "No existen Roles" });
-            }
-
-            if (!departamentos) {
-                return req.status(400).json({ msg: "No existen Departamentos" });
-            }
-
-            if (!ciudades) {
-                return req.status(400).json({ msg: "No existen Ciudades" });
-            }
-
             return res.status(200).json({ roles, departamentos, ciudades });
 
         } catch (error) {
@@ -66,9 +54,6 @@ const userController = {
             const salt = bcrypt.genSaltSync(10);
             const hashedPassword = bcrypt.hashSync(password, salt);
 
-            /* transacción asegura que las inserciones se realzen con éxito */
-            //  await db.beginTransaction();
-
             const userId = await User.createUser({ email, hashedPassword, role_id, slug });
 
             await Persona.createPersona({
@@ -84,8 +69,6 @@ const userController = {
                 ciudade_id
             });
 
-            /* confirma que la transacción se ha realizado */
-            //  await db.commit();
 
             res.status(201).json({ msg: "Usuario creado exitosamente", userId });
 
@@ -177,12 +160,12 @@ const userController = {
 
     userDelete: async (req, res) => {
         const { id } = req.params;
-    
+
         try {
             await User.deleteUser(id);
-    
+
             return res.status(200).json({ msg: "Usuario eliminado exitosamente" });
-            
+
         } catch (error) {
             return res.status(500).json({ msg: error.message || "Error en el Servidor" });
         }

@@ -2,6 +2,7 @@
 import AppLayout from "@/components/layout/AppLayout.vue";
 import TextInput from "@/components/TextInput.vue";
 import SelectInput from "@/components/SelectInput.vue";
+import FlashMessage from "@/components/FlashMessage.vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
 import { ref, onMounted } from "vue";
@@ -9,11 +10,12 @@ import moment from "moment-timezone";
 
 const route = useRoute();
 
-/*  data and message */
+/*  values */
 const roles = ref(null);
 const ciudades = ref(null);
 const departamentos = ref(null);
 const message = ref("");
+const errors = ref({});
 
 /* form edit */
 const form = ref({
@@ -35,6 +37,10 @@ const form = ref({
 });
 
 /* functions */
+
+const close = () => {
+  message.value = "";
+};
 
 const getCurrentDptoId = (ciudades, ciudade_id) => {
   const ciudad = ciudades.filter((ciudade) => ciudade.id === ciudade_id);
@@ -60,8 +66,6 @@ const slugify = () => {
 
   form.value.slug = slug;
 };
-
-
 
 /* fetch data */
 
@@ -112,17 +116,34 @@ const fetchData = async () => {
     console.error("Error al cargar el usuario:", error);
     message.value = error.response.data.message || "Error al crear el usuario";
   }
-
 };
 
 const updateUser = async () => {
   try {
-    const { slug } = route.params;
-    const response = await axios.put(`http://localhost:3000/api/users/update/${slug}`, form.value);
-    message.value = response.data.message;
-    fetchData();
+    const response = await axios.put(
+      `http://localhost:3000/api/users/update/${form.value.id}`,
+      form.value
+    );
+    message.value = response.data.msg;
+    // fetchData();
   } catch (error) {
-    console.error(error);
+    if (error.response) {
+      const errorObject = error.response.data.errors || [];
+
+      const newObjectError = {};
+
+      errorObject.forEach((err) => {
+        const path = err.path;
+
+        if (!newObjectError[path]) {
+          newObjectError[path] = [];
+        }
+
+        newObjectError[path].push(err);
+      });
+
+      errors.value = newObjectError;
+    }
   }
 };
 
@@ -131,23 +152,25 @@ onMounted(fetchData);
 <template>
   <AppLayout :title="`Editar Usuario`">
     <template #content>
-      <div class="w-full h-full overflow-y-auto flex flex-col gap-5">
+      <div class="w-full h-full overflow-y-auto flex flex-col gap-5 relative">
+        <!-- flash message -->
+        <FlashMessage
+          v-if="message"
+          type="success"
+          :message="message"
+          @close="close"
+        />
         <!-- form -->
         <div class="w-full rounded-lg bg-white shadow-md p-4 lg:p-6 mt-4">
           <form @submit.prevent="updateUser" class="flex flex-col gap-4">
             <div
-              class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap">
-              <TextInput
-                class="hidden"
-                label="Nombre"
-                type="text"
-                id="nombre"
-                v-model="form.id"
-              />
+              class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap"
+            >
               <TextInput
                 label="Nombre"
                 type="text"
                 id="nombre"
+                :error="errors.nombre"
                 v-model="form.nombre"
                 @input="slugify()"
               />
@@ -155,6 +178,7 @@ onMounted(fetchData);
                 label="Apellidos"
                 type="text"
                 id="apellidos"
+                :error="errors.apellidos"
                 v-model="form.apellidos"
                 @input="slugify()"
               />
@@ -162,6 +186,7 @@ onMounted(fetchData);
                 label="Slug"
                 type="text"
                 id="slug"
+                :error="errors.slug"
                 v-model="form.slug"
                 disabled="true"
               />
@@ -170,12 +195,14 @@ onMounted(fetchData);
                 label="Teléfono"
                 type="text"
                 id="telefono"
+                :error="errors.telefono"
                 v-model="form.telefono"
               />
               <TextInput
                 label="Fecha de Nacimiento"
                 type="date"
                 id="fecha_nacimiento"
+                :error="errors.fecha_nacimiento"
                 v-model="form.fecha_nacimiento"
               />
               <TextInput
@@ -184,9 +211,15 @@ onMounted(fetchData);
                 id="edad"
                 min="1"
                 max="100"
+                :error="errors.edad"
                 v-model="form.edad"
               />
-              <SelectInput label="Sexo" id="sexo" v-model="form.sexo">
+              <SelectInput
+                label="Sexo"
+                id="sexo"
+                :error="errors.sexo"
+                v-model="form.sexo"
+              >
                 <template #options>
                   <option :value="null"></option>
                   <option value="femenino">Femenino</option>
@@ -196,13 +229,15 @@ onMounted(fetchData);
               <SelectInput
                 label="Departamento"
                 id="departamento_id"
-                v-model="form.departamento_id">
+                v-model="form.departamento_id"
+              >
                 <template #options>
                   <option :value="null"></option>
                   <option
                     v-for="departamento in departamentos"
                     :key="departamento.id"
-                    :value="departamento.id">
+                    :value="departamento.id"
+                  >
                     {{ departamento.nombre }}
                   </option>
                 </template>
@@ -210,13 +245,16 @@ onMounted(fetchData);
               <SelectInput
                 label="Ciudad"
                 id="ciudade_id"
-                v-model="form.ciudade_id">
+                :error="errors.ciudade_id"
+                v-model="form.ciudade_id"
+              >
                 <template #options>
                   <option :value="null"></option>
                   <option
                     v-for="ciudade in ciudades"
                     :key="ciudade.id"
-                    :value="ciudade.id">
+                    :value="ciudade.id"
+                  >
                     {{ ciudade.nombre }}
                   </option>
                 </template>
@@ -225,12 +263,14 @@ onMounted(fetchData);
                 label="Dirección"
                 type="text"
                 id="direccion"
+                :error="errors.direccion"
                 v-model="form.direccion"
               />
               <TextInput
                 label="Correo"
                 type="email"
                 id="email"
+                :error="errors.email"
                 v-model="form.email"
               />
               <TextInput
@@ -238,9 +278,15 @@ onMounted(fetchData);
                 type="password"
                 id="password"
                 placeholder="Déjala en blanco si no deseas cambiarla"
+                :error="errors.password"
                 v-model="form.password"
               />
-              <SelectInput label="Rol" id="role_id" v-model="form.role_id">
+              <SelectInput
+                label="Rol"
+                id="role_id"
+                :error="errors.role_id"
+                v-model="form.role_id"
+              >
                 <template #options>
                   <option :value="null"></option>
                   <option v-for="role in roles" :key="role.id" :value="role.id">
@@ -250,7 +296,8 @@ onMounted(fetchData);
               </SelectInput>
               <button
                 type="submit"
-                class="h-10 w-72 bg-primary text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8">
+                class="h-10 w-72 bg-primary text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8"
+              >
                 Editar
               </button>
             </div>

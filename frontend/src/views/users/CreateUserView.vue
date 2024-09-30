@@ -2,6 +2,7 @@
 import AppLayout from "@/components/layout/AppLayout.vue";
 import TextInput from "@/components/TextInput.vue";
 import SelectInput from "@/components/SelectInput.vue";
+import FlashMessage from "@/components/FlashMessage.vue";
 import axios from "axios";
 import { ref, onMounted } from "vue";
 
@@ -25,6 +26,7 @@ const form = ref({
 
 const errors = ref({});
 
+/* functios */
 const cleanForm = () => {
   for (let clave in form.value) {
     form.value[clave] = "";
@@ -44,6 +46,10 @@ const slugify = () => {
   form.value.slug = slug;
 };
 
+const close = ()=>{
+  message.value = ""
+}
+
 /* to show in the select input */
 const departamentos = ref(null);
 const ciudades = ref(null);
@@ -59,9 +65,11 @@ const createUser = async () => {
       form.value
     );
 
-    message.value = response.data.message;
+    message.value = response.data.msg;
 
+    errors.value = {}
     cleanForm();
+
   } catch (error) {
     if (error.response) {
       const errorObject = error.response.data.errors || [];
@@ -101,7 +109,9 @@ onMounted(fechData);
 <template>
   <AppLayout :title="`Crear Usuarios`">
     <template #content>
-      <div class="w-full h-full overflow-y-auto flex flex-col gap-5">
+      <div class="w-full h-full overflow-y-auto flex flex-col gap-5 relative">
+        <!-- flash message -->
+        <FlashMessage v-if="message" type="success" :message="message" @close="close" />
         <!-- form -->
         <div class="w-full rounded-lg bg-white shadow-md p-4 lg:p-6 mt-4">
           <form @submit.prevent="createUser" class="flex flex-col gap-4">
@@ -161,7 +171,11 @@ onMounted(fechData);
                 :error="errors.edad"
                 v-model="form.edad"
               />
-              <SelectInput label="Sexo" id="sexo" :error="errors.sexo" v-model="form.sexo">
+              <SelectInput
+                label="Sexo"
+                id="sexo"
+                :error="errors.sexo"
+                v-model="form.sexo">
                 <template #options>
                   <option :value="null"></option>
                   <option value="femenino">Femenino</option>
@@ -171,8 +185,7 @@ onMounted(fechData);
               <SelectInput
                 label="Departamento"
                 id="departamento_id"
-                v-model="form.departamento_id"
-              >
+                v-model="form.departamento_id">
                 <template #options>
                   <option :value="null"></option>
                   <option
@@ -222,7 +235,12 @@ onMounted(fechData);
                 :error="errors.password"
                 v-model="form.password"
               />
-              <SelectInput label="Rol" id="role_id" :error="errors.role_id" v-model="form.role_id">
+              <SelectInput
+                label="Rol"
+                id="role_id"
+                :error="errors.role_id"
+                v-model="form.role_id"
+              >
                 <template #options>
                   <option :value="null"></option>
                   <option v-for="role in roles" :key="role.id" :value="role.id">
