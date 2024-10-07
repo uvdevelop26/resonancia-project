@@ -1,9 +1,11 @@
 <script setup>
 import Logo from "@/components/icons/Logo.vue";
+import FlashMessage from "@/components/FlashMessage.vue";
 import axios from "axios";
 import TextInput from "@/components/TextInput.vue";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { Utilities } from "@/js/Utilities";
 
 const router = useRouter();
 
@@ -14,6 +16,12 @@ const form = ref({
 
 const errors = ref({});
 const message = ref("");
+
+/* funciones */
+
+const close = () => {
+  Utilities.close(message);
+};
 
 // Función para iniciar sesión
 const login = async () => {
@@ -32,13 +40,15 @@ const login = async () => {
     router.push("/dashboard");
   } catch (error) {
     if (error.response) {
+      message.value = error.response.data.msg;
+
       const errorObject = error.response.data.errors || [];
 
       const newErrorObject = {};
 
       errorObject.forEach((err) => {
         const path = err.path;
-      
+
         if (!newErrorObject[path]) {
           newErrorObject[path] = [];
         }
@@ -48,7 +58,6 @@ const login = async () => {
       errors.value = newErrorObject;
     }
 
-    message.value = "";
     console.error("Error en el login:");
   }
 };
@@ -56,18 +65,29 @@ const login = async () => {
 
 <template>
   <div
-    class="w-full h-full bg-primary flex items-end relative md:items-center md:justify-center">
+    class="w-full h-full bg-primary flex items-end relative md:items-center md:justify-center"
+  >
+    <FlashMessage
+      v-if="message"
+      type="error"
+      :message="message"
+      @close="close"
+    />
     <div
-      class="w-full flex flex-col md:flex-row md:w-auto md:rounded-2xl overflow-hidden md:shadow-2xl">
+      class="w-full flex flex-col md:flex-row md:w-auto md:rounded-2xl overflow-hidden md:shadow-2xl"
+    >
       <div
-        class="h-52 md:h-auto flex items-center justify-center md:w-72 md:flex-1 md:bg-primary-light">
+        class="h-52 md:h-auto flex items-center justify-center md:w-72 md:flex-1 md:bg-primary-light"
+      >
         <div
-          class="p-3 bg-white rounded-tl-xl rounded-bl-xl rounded-br-xl md:bg-primary">
+          class="p-3 bg-white rounded-tl-xl rounded-bl-xl rounded-br-xl md:bg-primary"
+        >
           <Logo class="w-12 h-12 fill-primary md:fill-white" />
         </div>
       </div>
       <div
-        class="bg-white h-[25rem] pt-8 px-4 rounded-tl-[6rem] flex flex-col items-center md:rounded-tl-none md:flex-1 md:px-6">
+        class="bg-white h-[25rem] pt-8 px-4 rounded-tl-[6rem] flex flex-col items-center md:rounded-tl-none md:flex-1 md:px-6"
+      >
         <h1 class="text-2xl font-bold text-primary italic">Login</h1>
         <form @submit.prevent="login" class="flex flex-col pt-4">
           <TextInput
@@ -88,10 +108,12 @@ const login = async () => {
             :error="errors.password"
           />
           <div
-            class="mt-8 h-10 w-full overflow-hidden rounded-lg bg-primary shadow-md group hover:bg-primary-light">
+            class="mt-8 h-10 w-full overflow-hidden rounded-lg bg-primary shadow-md group hover:bg-primary-light"
+          >
             <button
               type="submit"
-              class="w-full h-full text-white font-bold hover:text-primary">
+              class="w-full h-full text-white font-bold hover:text-primary"
+            >
               Ingresar
             </button>
           </div>

@@ -1,24 +1,36 @@
-const db = require("../config/db");
+module.exports = (sequelize, DataTypes) => {
+
+    const Ciudade = sequelize.define("Ciudade", {
+
+        ciudade_nombre: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
+
+        departamento_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        }
+    });
 
 
-const Ciudade = {
-
-    async getCiudades(req, res) {
-
-        const query = `SELECT * FROM ciudades`;
-
-        return new Promise((resolve, reject) => {
-            db.query(query, (err, result) => {
-                if (err) {
-                    return reject(err);
-                }
-                return resolve(result);
-            });
+    Ciudade.associate = (models) => {
+        Ciudade.belongsTo(models.Departamento, {
+            foreignKey: 'departamento_id',
+            as: 'departamento'
         });
 
+        Ciudade.hasMany(models.Persona, {
+            foreignKey: 'ciudade_id',
+            as: 'personas'
+        });
     }
 
-
+    return Ciudade;
 }
-
-module.exports = Ciudade;

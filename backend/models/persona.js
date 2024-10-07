@@ -1,76 +1,111 @@
-const db = require('../config/db');
+module.exports = (sequelize, DataTypes) => {
 
-const Persona = {
+    const Persona = sequelize.define("Persona", {
 
-    /* get Persona by user Id */
-    async getPersonaByUserId(userId) {
+        nombre: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
 
-        const query = `SELECT * FROM personas WHERE user_id = ?`;
+        apellido: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
+        slug: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
 
-        return new Promise((resolve, reject) => {
-            db.query(query, [userId], (err, result) => {
-                if (err) {
-                    return reject(err);
-                }
+        dni: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true,
+            validate: {
+                notEmpty: true
+            }
+        },
 
-                return resolve(result[0]);
+        telefono: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
 
-            });
+        fecha_nacimiento: {
+            type: DataTypes.DATE,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
+
+        sexo: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
+
+        direccion: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
+
+        edad: {
+            type: DataTypes.TINYINT,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
+
+        user_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
+
+        ciudade_id: {
+            type: DataTypes.INTEGER,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        }
+
+    });
+
+
+    Persona.associate = (models) => {
+        Persona.belongsTo(models.User, {
+            foreignKey: 'user_id',
+            as: 'user'
         });
 
-    },
-
-    /* get Persona by dni */
-
-    async getPersonaByDni(dni) {
-        const query = `SELECT * FROM personas WHERE dni = ?`;
-
-        return new Promise((resolve, reject) => {
-            db.query(query, [dni], (err, result) => {
-                if (err) {
-                    return reject(err);
-                }
-
-                return resolve(result[0]);
-
-            });
-        });
-    },
-
-
-    /* Create Persona */
-
-    async createPersona({ nombre, apellidos, dni, telefono, fecha_nacimiento, sexo, direccion, edad, user_id, ciudade_id }) {
-
-        const query = `INSERT INTO personas (nombre, apellidos, dni, telefono, fecha_nacimiento, sexo, direccion, edad, user_id, ciudade_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-        return new Promise((resolve, reject) => {
-            db.query(query, [nombre, apellidos, dni, telefono, fecha_nacimiento, sexo, direccion, edad, user_id, ciudade_id], (err, result) => {
-                if (err) {
-                    return reject(err);
-                }
-                return resolve(true);
-            });
-        });
-    },
-
-    /* Update Persona */
-    async updatePersona({ nombre, apellidos, dni, telefono, fecha_nacimiento, sexo, direccion, edad, user_id, ciudade_id }) {
-
-        const query = `UPDATE personas SET nombre = ?, apellidos = ?, dni = ?, telefono = ?, fecha_nacimiento = ?, sexo = ?, direccion = ?, edad = ?, ciudade_id = ? WHERE user_id = ?`;
-
-        return new Promise((resolve, reject) => {
-            db.query(query, [nombre, apellidos, dni, telefono, fecha_nacimiento, sexo, direccion, edad, ciudade_id, user_id], (err, result) => {
-                if (err) {
-                    reject(err)
-                }
-
-                resolve(true);
-            });
+        Persona.belongsTo(models.Ciudade, {
+            foreignKey: 'ciudade_id',
+            as: 'ciudade'
         });
     }
 
 
-}
+    return Persona;
 
-module.exports = Persona;
+}

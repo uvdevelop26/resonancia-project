@@ -35,92 +35,16 @@ const router = createRouter({
     {
       path: '/users/edit/:slug',
       name: 'EditUser',
-      component: EditUserView, 
+      component: EditUserView,
       meta: { requiresAuth: true },
     },
-
-    /* camara */
     {
       path: '/analisis',
       name: 'analisis',
       component: Camara,
       meta: { requiresAuth: true },
     },
-    
 
-    /* users */
-
-    /* */
-
-    /*    
-      
-       */
-
-    /* roles */
-    /* {
-      path: '/roles',
-      name: 'roles',
-      component: roleIndex,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/roles/create',
-      name: 'createRole',
-      component: CreateRole,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/roles/edit/:id',
-      name: 'editRole',
-      component: EditRole,
-      meta: { requiresAuth: true },
-    }, */
-
-    /* fincas */
-    /* {
-      path: '/fincas',
-      name: 'fincas',
-      component: fincaIndex,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/fincas/create',
-      name: 'createFinca',
-      component: CreateFinca,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/fincas/edit/:id',
-      name: 'editFinca',
-      component: EditFinca,
-      meta: { requiresAuth: true },
-    }, */
-
-
-    /* cultivos */
-    /* {
-      path: '/cultivos',
-      name: 'cultivos',
-      component: cultivoIndex,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/cultivos/create',
-      name: 'CreateCultivo',
-      component: CreateCultivo,
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/capturar',
-      name: 'capturar',
-      component: Capturar
-    },
-    {
-      path: '/cultivos/edit/:id',
-      name: 'editCultivo',
-      component: EditCultivo,
-      meta: { requiresAuth: true },
-    }, */
   ]
 });
 

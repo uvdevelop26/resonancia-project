@@ -6,126 +6,68 @@ import FlashMessage from "@/components/FlashMessage.vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
 import { ref, onMounted } from "vue";
-import moment from "moment-timezone";
+import { Utilities } from "@/js/Utilities";
 
 const route = useRoute();
 
 /*  values */
 const roles = ref(null);
-const ciudades = ref(null);
-const departamentos = ref(null);
+const ciudades = ref([]);
+const departamentos = ref([]);
 const message = ref("");
 const errors = ref({});
 
 /* form edit */
 const form = ref({
-  id: "",
+  /* persona */
   nombre: "",
-  apellidos: "",
+  apellido: "",
   slug: "",
   dni: "",
   telefono: "",
   fecha_nacimiento: "",
-  edad: "",
   sexo: "",
+  direccion: "",
+  edad: "",
   ciudade_id: "",
   departamento_id: "",
-  direccion: "",
+  /* user */
   email: "",
-  role_id: "",
   password: "",
+  role_id: "",
+  profile_photo_path: "",
 });
 
 /* functions */
 
 const close = () => {
-  message.value = "";
+  Utilities.close(message);
 };
 
 const getCurrentDptoId = (ciudades, ciudade_id) => {
   const ciudad = ciudades.filter((ciudade) => ciudade.id === ciudade_id);
   const departamentoId = ciudad[0].departamento_id;
-
   return departamentoId;
 };
 
-const getFormattedDate = (date) => {
-  const formattedDate = moment(date).format("YYYY-MM-DD");
-  return formattedDate;
-};
-
-const slugify = () => {
-  const fullName = `${form.value.nombre} ${form.value.apellidos}`;
-  const slug = fullName
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w\-]+/g, "")
-    .replace(/\-\-+/g, "-");
-
+const getSlug = () => {
+  const slug = Utilities.slugify(form.value.nombre, form.value.apellido);
   form.value.slug = slug;
 };
 
-/* fetch data */
+/* update user */
 
-const fetchData = async () => {
+const update = async () => {
   const { slug } = route.params;
 
   try {
-    const response = await axios.get(
-      `http://localhost:3000/api/users/edit/${slug}`
-    );
-
-    /* get datas */
-
-    ciudades.value = response.data.ciudades;
-    departamentos.value = response.data.departamentos;
-    roles.value = response.data.roles;
-
-    const departamentoId = getCurrentDptoId(
-      ciudades.value,
-      response.data.persona.ciudade_id
-    );
-
-    const formattedDateBday = getFormattedDate(
-      response.data.persona.fecha_nacimiento
-    );
-
-    /* fill form */
-    form.value = {
-      id: response.data.user.id,
-      nombre: response.data.persona.nombre,
-      apellidos: response.data.persona.apellidos,
-      slug: response.data.user.slug,
-      dni: response.data.persona.dni,
-      telefono: response.data.persona.telefono,
-      fecha_nacimiento: formattedDateBday,
-      edad: response.data.persona.edad,
-      sexo: response.data.persona.sexo,
-      ciudade_id: response.data.persona.ciudade_id,
-      departamento_id: departamentoId,
-      direccion: response.data.persona.direccion,
-      email: response.data.user.email,
-      role_id: response.data.user.role_id,
-      password: "",
-    };
-
-    message.value = response.data.message;
-  } catch (error) {
-    console.error("Error al cargar el usuario:", error);
-    message.value = error.response.data.message || "Error al crear el usuario";
-  }
-};
-
-const updateUser = async () => {
-  try {
     const response = await axios.put(
-      `http://localhost:3000/api/users/update/${form.value.id}`,
+      `http://localhost:3000/api/users/update/${slug}`,
       form.value
     );
+    
     message.value = response.data.msg;
-    // fetchData();
+  
   } catch (error) {
     if (error.response) {
       const errorObject = error.response.data.errors || [];
@@ -147,6 +89,69 @@ const updateUser = async () => {
   }
 };
 
+/* fetch data */
+
+const fetchData = async () => {
+  const { slug } = route.params;
+
+  try {
+    const response = await axios.get(
+      `http://localhost:3000/api/users/edit/${slug}`
+    );
+
+    /* getting data */
+    roles.value = response.data.roles;
+
+    const departamentosData = response.data.departamentos;
+    const persona = response.data.persona;
+    const user = response.data.user;
+
+    departamentosData.forEach((departamento) => {
+      departamento.ciudades.forEach((ciudade) => {
+        ciudades.value.push(ciudade);
+      });
+    });
+
+    departamentosData.forEach((departamento) => {
+      delete departamento.ciudade;
+      departamentos.value.push(departamento);
+    });
+
+    /* filling form */
+    const departamentoId = getCurrentDptoId(
+      ciudades.value,
+      response.data.persona.ciudade_id
+    );
+
+    const formattedDateBday = Utilities.getFormattedDate(
+      persona.fecha_nacimiento
+    );
+
+    form.value = {
+      id: user.id,
+      nombre: persona.nombre,
+      apellido: persona.apellido,
+      slug: persona.slug,
+      dni: persona.dni,
+      telefono: persona.telefono,
+      fecha_nacimiento: formattedDateBday,
+      edad: persona.edad,
+      sexo: persona.sexo,
+      ciudade_id: persona.ciudade_id,
+      departamento_id: departamentoId,
+      direccion: persona.direccion,
+      email: user.email,
+      role_id: user.role_id,
+      password: "",
+    };
+
+
+  } catch (error) {
+    console.error("Error al cargar el usuario:", error);
+    message.value = error.response.data.message || "Error al crear el usuario";
+  }
+};
+
 onMounted(fetchData);
 </script>
 <template>
@@ -162,7 +167,7 @@ onMounted(fetchData);
         />
         <!-- form -->
         <div class="w-full rounded-lg bg-white shadow-md p-4 lg:p-6 mt-4">
-          <form @submit.prevent="updateUser" class="flex flex-col gap-4">
+          <form @submit.prevent="update" class="flex flex-col gap-4">
             <div
               class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap"
             >
@@ -172,15 +177,15 @@ onMounted(fetchData);
                 id="nombre"
                 :error="errors.nombre"
                 v-model="form.nombre"
-                @input="slugify()"
+                @input="getSlug()"
               />
               <TextInput
                 label="Apellidos"
                 type="text"
                 id="apellidos"
                 :error="errors.apellidos"
-                v-model="form.apellidos"
-                @input="slugify()"
+                v-model="form.apellido"
+                @input="getSlug()"
               />
               <TextInput
                 label="Slug"
@@ -238,7 +243,7 @@ onMounted(fetchData);
                     :key="departamento.id"
                     :value="departamento.id"
                   >
-                    {{ departamento.nombre }}
+                    {{ departamento.departamento_nombre }}
                   </option>
                 </template>
               </SelectInput>
@@ -255,7 +260,7 @@ onMounted(fetchData);
                     :key="ciudade.id"
                     :value="ciudade.id"
                   >
-                    {{ ciudade.nombre }}
+                    {{ ciudade.ciudade_nombre }}
                   </option>
                 </template>
               </SelectInput>
@@ -290,7 +295,7 @@ onMounted(fetchData);
                 <template #options>
                   <option :value="null"></option>
                   <option v-for="role in roles" :key="role.id" :value="role.id">
-                    {{ role.nombre }}
+                    {{ role.role_nombre }}
                   </option>
                 </template>
               </SelectInput>

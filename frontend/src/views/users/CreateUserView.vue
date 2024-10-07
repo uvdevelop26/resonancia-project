@@ -5,60 +5,54 @@ import SelectInput from "@/components/SelectInput.vue";
 import FlashMessage from "@/components/FlashMessage.vue";
 import axios from "axios";
 import { ref, onMounted } from "vue";
+import { Utilities } from "@/js/Utilities";
 
 /* create form */
 const form = ref({
+  /* persona */
   nombre: "",
-  apellidos: "",
+  apellido: "",
   slug: "",
   dni: "",
   telefono: "",
   fecha_nacimiento: "",
-  edad: "",
   sexo: "",
+  direccion: "",
+  edad: "",
   ciudade_id: "",
   departamento_id: "",
-  direccion: "",
+  /* user */
   email: "",
-  role_id: "",
   password: "",
+  profile_photo_path: "",
+  role_id: "",
 });
 
 const errors = ref({});
 
 /* functios */
 const cleanForm = () => {
-  for (let clave in form.value) {
-    form.value[clave] = "";
-  }
+  Utilities.cleanForm(form);
 };
 
-const slugify = () => {
-  const fullName = `${form.value.nombre} ${form.value.apellidos}`;
-  const slug = fullName
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, "-")
-    .replace(/[^\w\-]+/g, "")
-    .replace(/\-\-+/g, "-");
-
+const getSlug = () => {
+  const slug = Utilities.slugify(form.value.nombre, form.value.apellido);
   form.value.slug = slug;
 };
 
-const close = ()=>{
-  message.value = ""
-}
+const close = () => {
+  Utilities.close(message);
+};
 
 /* to show in the select input */
-const departamentos = ref(null);
-const ciudades = ref(null);
+const departamentos = ref([]);
+const ciudades = ref([]);
 const roles = ref(null);
 
 const message = ref("");
 
 /* create new user */
-const createUser = async () => {
+const store = async () => {
   try {
     const response = await axios.post(
       "http://localhost:3000/api/users/store",
@@ -67,9 +61,9 @@ const createUser = async () => {
 
     message.value = response.data.msg;
 
-    errors.value = {}
     cleanForm();
 
+    errors.value = {};
   } catch (error) {
     if (error.response) {
       const errorObject = error.response.data.errors || [];
@@ -96,11 +90,22 @@ const fechData = async () => {
   try {
     const response = await axios.get("http://localhost:3000/api/users/create");
 
-    departamentos.value = response.data.departamentos;
-    ciudades.value = response.data.ciudades;
     roles.value = response.data.roles;
+
+    const departamentosData = response.data.departamentos;
+
+    departamentosData.forEach((departamento) => {
+      departamento.ciudades.forEach((ciudade) => {
+        ciudades.value.push(ciudade);
+      });
+    });
+
+    departamentosData.forEach((departamento) => {
+      delete departamento.ciudade;
+      departamentos.value.push(departamento);
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Error en el servidor", error);
   }
 };
 
@@ -111,27 +116,33 @@ onMounted(fechData);
     <template #content>
       <div class="w-full h-full overflow-y-auto flex flex-col gap-5 relative">
         <!-- flash message -->
-        <FlashMessage v-if="message" type="success" :message="message" @close="close" />
+        <FlashMessage
+          v-if="message"
+          type="success"
+          :message="message"
+          @close="close"
+        />
         <!-- form -->
         <div class="w-full rounded-lg bg-white shadow-md p-4 lg:p-6 mt-4">
-          <form @submit.prevent="createUser" class="flex flex-col gap-4">
+          <form @submit.prevent="store" class="flex flex-col gap-4">
             <div
-              class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap">
+              class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap"
+            >
               <TextInput
                 label="Nombre"
                 type="text"
                 id="nombre"
                 :error="errors.nombre"
                 v-model="form.nombre"
-                @input="slugify()"
+                @input="getSlug()"
               />
               <TextInput
                 label="Apellidos"
                 type="text"
                 id="apellidos"
-                :error="errors.apellidos"
-                v-model="form.apellidos"
-                @input="slugify()"
+                :error="errors.apellido"
+                v-model="form.apellido"
+                @input="getSlug()"
               />
               <TextInput
                 label="Slug"
@@ -175,7 +186,8 @@ onMounted(fechData);
                 label="Sexo"
                 id="sexo"
                 :error="errors.sexo"
-                v-model="form.sexo">
+                v-model="form.sexo"
+              >
                 <template #options>
                   <option :value="null"></option>
                   <option value="femenino">Femenino</option>
@@ -185,7 +197,8 @@ onMounted(fechData);
               <SelectInput
                 label="Departamento"
                 id="departamento_id"
-                v-model="form.departamento_id">
+                v-model="form.departamento_id"
+              >
                 <template #options>
                   <option :value="null"></option>
                   <option
@@ -193,7 +206,7 @@ onMounted(fechData);
                     :key="departamento.id"
                     :value="departamento.id"
                   >
-                    {{ departamento.nombre }}
+                    {{ departamento.departamento_nombre }}
                   </option>
                 </template>
               </SelectInput>
@@ -210,7 +223,7 @@ onMounted(fechData);
                     :key="ciudade.id"
                     :value="ciudade.id"
                   >
-                    {{ ciudade.nombre }}
+                    {{ ciudade.ciudade_nombre }}
                   </option>
                 </template>
               </SelectInput>
@@ -244,7 +257,7 @@ onMounted(fechData);
                 <template #options>
                   <option :value="null"></option>
                   <option v-for="role in roles" :key="role.id" :value="role.id">
-                    {{ role.nombre }}
+                    {{ role.role_nombre }}
                   </option>
                 </template>
               </SelectInput>

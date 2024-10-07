@@ -3,16 +3,17 @@ import AppLayout from "@/components/layout/AppLayout.vue";
 import Edit from "@/components/icons/Edit.vue";
 import Delete from "@/components/icons/Delete.vue";
 import FlashMessage from "@/components/FlashMessage.vue";
+import Modal from "@/components/Modal.vue";
 import { ref, onMounted } from "vue";
+import { Utilities } from "@/js/Utilities";
 import axios from "axios";
 
 const users = ref([]);
 const message = ref("");
 
-
-const close = ()=>{
-  message.value = ""
-}
+const close = () => {
+  Utilities.close(message);
+};
 
 const fetchUsers = async () => {
   try {
@@ -23,48 +24,44 @@ const fetchUsers = async () => {
   }
 };
 
-const deleteUser = async (userId) => {
+const deleteUser = async (slug) => {
   try {
     const response = await axios.delete(
-      `http://localhost:3000/api/users/delete/${userId}`
+      `http://localhost:3000/api/users/delete/${slug}`
     );
 
     message.value = response.data.msg;
 
     // Filtra el usuario eliminado de la lista de usuarios
-    users.value = users.value.filter((user) => user.id !== userId);
+    users.value = users.value.filter((user) => user.personas[0].slug !== slug);
   } catch (error) {
     console.error("Error al eliminar el usuario:", error);
   }
 };
 
-onMounted(() => {
-  fetchUsers();
-});
+onMounted(fetchUsers);
 </script>
 <template>
   <AppLayout :title="`Lista de Usuarios`">
     <template #content>
       <div class="w-full h-full overflow-y-auto flex flex-col gap-5 relative">
-        <!-- flash message -->
         <FlashMessage
           v-if="message"
           type="success"
           :message="message"
           @close="close"
         />
-        <!-- header -->
+
         <div class="w-full flex justify-end items-center mt-4">
           <router-link
             to="/users/create"
-            class="w-28 h-8 text-white font-bold bg-primary flex items-center justify-center rounded-md shadow-lg hover:bg-primary-light hover:text-primary hover:border"
+            class="w-28 h-8 text-white font-bold bg-primary flex items-center justify-center rounded-lg shadow-lg hover:bg-primary-light hover:text-primary hover:border"
           >
             Crear
           </router-link>
         </div>
-        <!-- table -->
+
         <div class="w-full overflow-x-auto rounded-lg bg-white shadow-md">
-          <!-- table -->
           <table class="w-full text-sm whitespace-nowrap overflow-hidden">
             <thead>
               <tr class="h-12 shadow text-sm border-b-2">
@@ -109,6 +106,7 @@ onMounted(() => {
               <tr
                 class="h-14 text-center shadow group border-b-2"
                 v-for="(user, index) in users"
+                :key="user.id"
               >
                 <td
                   class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100"
@@ -118,17 +116,17 @@ onMounted(() => {
                 <td
                   class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100"
                 >
-                  {{ user.nombre }}
+                  {{ user.personas[0].nombre }}
                 </td>
                 <td
                   class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100"
                 >
-                  {{ user.apellidos }}
+                  {{ user.personas[0].apellido }}
                 </td>
                 <td
                   class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100"
                 >
-                  {{ user.dni }}
+                  {{ user.personas[0].dni }}
                 </td>
                 <td
                   class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100"
@@ -138,7 +136,7 @@ onMounted(() => {
                 <td
                   class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100"
                 >
-                  {{ user.rol }}
+                  {{ user.role.role_nombre }}
                 </td>
                 <td
                   class="py-1 px-1 text-sm md:text-xs bg-white group-hover:bg-gray-100"
@@ -147,13 +145,13 @@ onMounted(() => {
                     class="w-full h-full flex items-center justify-center gap-2"
                   >
                     <router-link
-                      :to="`/users/edit/${user.slug}`"
+                      :to="`/users/edit/${user.personas[0].slug}`"
                       class="inline-block border bg-primary-light px-3 py-3 rounded-full bg-light-green-two hover:shadow-md"
                     >
                       <Edit class="w-3 h-3 fill-primary" />
                     </router-link>
                     <button
-                      @click="deleteUser(user.id)"
+                      @click="deleteUser(user.personas[0].slug)"
                       class="inline-block border bg-primary-light px-3 py-3 rounded-full bg-light-green-two hover:shadow-md"
                     >
                       <Delete class="w-3 h-3 fill-primary" />

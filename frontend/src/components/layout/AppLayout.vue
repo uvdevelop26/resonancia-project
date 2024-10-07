@@ -4,7 +4,7 @@ import Home from "../icons/Home.vue";
 import User from "../icons/User.vue";
 import Camara from "../icons/Camara.vue";
 import Logo from "../icons/Logo.vue";
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import router from "@/router";
 
 const props = defineProps({
@@ -13,7 +13,6 @@ const props = defineProps({
 
 const isActive = (path) => {
   const currentPath = router.currentRoute.value.fullPath;
-
   return currentPath.startsWith(path) ? true : false;
 };
 
@@ -51,7 +50,7 @@ const openSubmenu = ref(false);
                 />
               </div>
               <div class="flex items-center gap-1">
-                <span class="text-xs group-hover:text-primary">Nombre User</span>
+                <span class="text-xs group-hover:text-primary">Sofia Spaini</span>
                 <ChevronDown class="w-2 h-2" />
               </div>
             </button>

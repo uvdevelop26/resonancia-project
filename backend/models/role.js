@@ -1,24 +1,23 @@
-const db = require('../config/db');
+module.exports = (sequelize, DataTypes) => {
 
+    const Role = sequelize.define("Role", {
 
-const Role = {
+        role_nombre: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        }
+    });
 
-    async getRoles(req, res) {
-
-        const query = `SELECT * FROM roles`;
-
-        return new Promise((resolve, reject) => {
-            db.query(query, (err, result) => {
-                if (err) {
-                    return reject(err);
-                }
-                return resolve(result);
-            });
+    Role.associate = (models) => {
+        Role.hasMany(models.User, {
+            foreignKey: 'role_id',
+            as: 'users'
         });
-
     }
 
+
+    return Role;
 }
-
-
-module.exports = Role;

@@ -1,28 +1,29 @@
 const express = require('express');
-const cors = require('cors');
 const app = express();
-const path = require('path');
-const usersRouter = require('./routes/usersRoutes');
-const authRoutes = require('./routes/authRoutes');
-const imagenesRoutes = require('./routes/imagenesRoutes');
+const cors = require('cors');
+const db = require('./models');
+const AuthRoutes = require('./routes/AuthRoutes');
+const UserRoutes = require('./routes/UserRoutes');
 
 const PORT = process.env.PORT || 3000;
+
 const corsOptions = {
-    origin: 'http://localhost:5173', // Reemplaza con el puerto donde corre tu frontend Vue.js
+    origin: 'http://localhost:5173',
     optionsSuccessStatus: 200
 };
 
-// Middlewares
+
+//app.use('/storage', express.static(path.join(__dirname, 'storage')));
+
 app.use(cors(corsOptions));
 app.use(express.json());
 
-app.use('/storage', express.static(path.join(__dirname, 'storage')));
-// Rutas
-app.use('/api/auth', authRoutes);
-app.use('/api', usersRouter);
-app.use('/api/imagenes', imagenesRoutes);
+/* routes */
+app.use('/api/auth', AuthRoutes);
+app.use('/api/users', UserRoutes);
 
-//Puerto y Servidor
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
+db.sequelize.sync().then((req) => {
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
 });

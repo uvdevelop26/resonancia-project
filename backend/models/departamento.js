@@ -1,23 +1,23 @@
-const db = require('../config/db');
+module.exports = (sequelize, DataTypes) => {
 
-const Departamento = {
+    const Departamento = sequelize.define("Departamento", {
 
-    async getDepartamentos(req, res) {
+        departamento_nombre: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            validate: {
+                notEmpty: true
+            }
+        },
+    });
 
-        const query = `SELECT * FROM departamentos`;
 
-        return new Promise((resolve, reject) => {
-            db.query(query, (err, result) => {
-                if (err) {
-                    return reject(err);
-                }
-
-                return resolve(result);
-            });
+    Departamento.associate = (models) => {
+        Departamento.hasMany(models.Ciudade, {
+            foreignKey: 'departamento_id',
+            as: 'ciudades'
         });
-
     }
 
+    return Departamento;
 }
-
-module.exports = Departamento;
