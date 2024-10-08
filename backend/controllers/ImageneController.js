@@ -3,10 +3,10 @@ const fs = require('fs');
 const { Imagene } = require('../models');
 const multer = require('multer');
 
-// Configurar multer para guardar archivos en 'storage/analisis'
+/*  Configurar multer para guardar archivos en 'storage/analisis' */
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const dir = path.join(__dirname, '../storage/analisis'); // Cambia '../../' por '../'
+    const dir = path.join(__dirname, '../storage/analisis'); 
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -55,7 +55,6 @@ const ImageneController = {
         url: imageUrl,
       });
 
-      // Responder con éxito
       return res.status(201).json({
         msg: 'Imagen capturada correctamente',
         imageUrl: nuevaImagen.url,
