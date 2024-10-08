@@ -48,6 +48,7 @@ onMounted(fetchUsers);
         <FlashMessage
           v-if="message"
           type="success"
+          title="Operación Exitosa"
           :message="message"
           @close="close"
         />

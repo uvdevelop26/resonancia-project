@@ -2,12 +2,13 @@
 import { onMounted, computed, ref } from "vue";
 import { gsap } from "gsap";
 import AlertIcons from "./icons/AlertIcons.vue";
-import Close from "./icons/Close.vue";
-
+import Modal from "./Modal.vue";
 
 const props = defineProps({
   type: String,
+  title: String,
   message: String,
+
 });
 
 const customColor = computed(() => {
@@ -37,37 +38,40 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    ref="alertRef"
-    class="absolute w-full h-48 top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 border-t-4 bg-white shadow rounded-b-md max-w-96 md:h-52"
-    :class="{
-      'border-t-green-600': customColor === 'green-600',
-      'border-t-red-600': customColor === 'red-600',
-    }">
-    <div class="text-right px-4 py-2">
-      <button type="button" aria-label="close alert" @click="close">
-        <Close class="w-5 h-5 fill-gray-300 hover:fill-gray-400" />
-      </button>
-    </div>
-    <div class="p-4">
-      <div class="flex justify-center">
-        <AlertIcons
-          :name="props.type"
-          class="w-16 h-16"
+  <Modal :show="message" maxWidth="xs">
+    <div ref="alertRef"class="w-full h-40 p-4">
+      <div class="flex items-center gap-2">
+        <div
+          class="w-7 h-7 rounded-full flex items-center justify-center"
           :class="{
-            'fill-green-600': customColor === 'green-600',
-            'fill-red-600': customColor === 'red-600',
-          }"
-        />
+              'bg-green-600': customColor === 'green-600',
+              'bg-red-600': customColor === 'red-600',
+            }">
+          <AlertIcons :name="props.type" class="w-3 h-3 fill-white" />
+        </div>
+        <p
+          class="font-bold"
+          :class="{
+            'text-green-600': customColor === 'green-600',
+            'text-red-600': customColor === 'red-600',
+          }">
+          {{ title }}
+        </p>
       </div>
-      <p
-        class="pt-4 text-center italic"
-        :class="{
-          'text-green-600': customColor === 'green-600',
-          'text-red-600': customColor === 'red-600',
-        }">
-        {{ message }}
-      </p>
+      <p class="pt-3 pb-4">{{ message }}</p>
+      <div class="text-right pt-4 border-t">
+        <button
+          type="button"
+          aria-label="close alert"
+          @click="close"
+          class="w-16 h-8 rounded-lg text-sm text-white font-bold  "
+          :class="{
+              'bg-green-600 hover:text-green-600 hover:bg-green-200': customColor === 'green-600',
+              'bg-red-600 hover:text-red-600 hover:bg-red-200': customColor === 'red-600',
+            }">
+          Cerrar
+        </button>
+      </div>
     </div>
-  </div>
+  </Modal>
 </template>

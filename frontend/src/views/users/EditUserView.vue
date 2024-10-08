@@ -65,9 +65,8 @@ const update = async () => {
       `http://localhost:3000/api/users/update/${slug}`,
       form.value
     );
-    
+
     message.value = response.data.msg;
-  
   } catch (error) {
     if (error.response) {
       const errorObject = error.response.data.errors || [];
@@ -144,8 +143,6 @@ const fetchData = async () => {
       role_id: user.role_id,
       password: "",
     };
-
-
   } catch (error) {
     console.error("Error al cargar el usuario:", error);
     message.value = error.response.data.message || "Error al crear el usuario";
@@ -162,6 +159,7 @@ onMounted(fetchData);
         <FlashMessage
           v-if="message"
           type="success"
+          title="Operación Exitosa"
           :message="message"
           @close="close"
         />
@@ -223,8 +221,7 @@ onMounted(fetchData);
                 label="Sexo"
                 id="sexo"
                 :error="errors.sexo"
-                v-model="form.sexo"
-              >
+                v-model="form.sexo">
                 <template #options>
                   <option :value="null"></option>
                   <option value="femenino">Femenino</option>
@@ -234,15 +231,13 @@ onMounted(fetchData);
               <SelectInput
                 label="Departamento"
                 id="departamento_id"
-                v-model="form.departamento_id"
-              >
+                v-model="form.departamento_id">
                 <template #options>
                   <option :value="null"></option>
                   <option
                     v-for="departamento in departamentos"
                     :key="departamento.id"
-                    :value="departamento.id"
-                  >
+                    :value="departamento.id">
                     {{ departamento.departamento_nombre }}
                   </option>
                 </template>
@@ -251,15 +246,13 @@ onMounted(fetchData);
                 label="Ciudad"
                 id="ciudade_id"
                 :error="errors.ciudade_id"
-                v-model="form.ciudade_id"
-              >
+                v-model="form.ciudade_id">
                 <template #options>
                   <option :value="null"></option>
                   <option
                     v-for="ciudade in ciudades"
                     :key="ciudade.id"
-                    :value="ciudade.id"
-                  >
+                    :value="ciudade.id">
                     {{ ciudade.ciudade_nombre }}
                   </option>
                 </template>
@@ -290,8 +283,7 @@ onMounted(fetchData);
                 label="Rol"
                 id="role_id"
                 :error="errors.role_id"
-                v-model="form.role_id"
-              >
+                v-model="form.role_id">
                 <template #options>
                   <option :value="null"></option>
                   <option v-for="role in roles" :key="role.id" :value="role.id">
@@ -301,8 +293,7 @@ onMounted(fetchData);
               </SelectInput>
               <button
                 type="submit"
-                class="h-10 w-72 bg-primary text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8"
-              >
+                class="h-10 w-72 bg-primary text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8">
                 Editar
               </button>
             </div>

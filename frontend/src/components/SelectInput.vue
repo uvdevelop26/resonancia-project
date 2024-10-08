@@ -23,8 +23,7 @@ defineEmits(["update:modelValue"]);
       :class="errorClasess"
       :value="modelValue"
       :id="id"
-      @input="$emit('update:modelValue', $event.target.value)"
-    >
+      @input="$emit('update:modelValue', $event.target.value)">
       <slot name="options" />
     </select>
     <div v-if="error" class="text-xs text-red-500">{{ error[0].msg }}</div>

@@ -55,7 +55,7 @@ const openSubmenu = ref(false);
               </div>
             </button>
             <div
-              class="w-32 h-20 absolute left-1/2 -translate-x-1/2 -bottom-[5.1rem] bg-white rounded-lg shadow-md overflow-hidden"
+              class="w-32 h-20 absolute left-1/2 -translate-x-1/2 -bottom-[5.1rem] bg-white rounded-lg shadow-md overflow-hidden z-50"
               v-if="openSubmenu">
               <router-link
                 to="/"
@@ -89,7 +89,7 @@ const openSubmenu = ref(false);
             <Home class="w-7 h-7 fill-white" />
           </router-link>
         </div>
-        <div class="w-full h-full lg:h-20 relative"
+        <div class="w-full h-full lg:hidden relative"
         :class="isActive('/analisis') ? activeClasess : ''">
           <router-link 
           to="/analisis"

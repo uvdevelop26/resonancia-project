@@ -5,11 +5,9 @@ import axios from "axios";
 
 const imagenes = ref([]);
 
-/* const fetchImages = async () => {
+const fetchImages = async () => {
   try {
-    const response = await axios.get(
-      `http://localhost:3000/api/imagenes/images`
-    );
+    const response = await axios.get(`http://localhost:3000/api/imagenes/`);
 
     imagenes.value = response.data;
 
@@ -19,19 +17,20 @@ const imagenes = ref([]);
   }
 };
 
-onMounted(fetchImages); */
+onMounted(fetchImages);
 </script>
 
 <template>
   <AppLayout :title="`Dashboard`">
     <template #content>
       <div class="w-full h-full overflow-y-auto">
-        <!-- <h2 class="text-primary font-bold pb-4">Últimos Análisis Realizados</h2>
+        <h2 class="text-primary font-bold pb-4">Últimos Análisis Realizados</h2>
         <div v-if="imagenes.length" class="flex flex-col gap-2 md:flex-row">
           <div
             v-for="image in imagenes"
             :key="image.id"
-            class="w-full h-64 max-w-96 overflow-hidden rounded-md">
+            class="w-full h-64 max-w-96 overflow-hidden rounded-md"
+          >
             <img
               :src="`http://localhost:3000${image.url}`"
               alt="analisis"
@@ -41,7 +40,7 @@ onMounted(fetchImages); */
         </div>
         <div v-else class="text-sm text-primary italic">
           No has realizado análsis
-        </div> -->
+        </div>
       </div>
     </template>
   </AppLayout>

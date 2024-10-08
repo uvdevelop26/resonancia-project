@@ -1,14 +1,21 @@
 <script setup>
 import AppLayout from "@/components/layout/AppLayout.vue";
+import FlashMessage from "@/components/FlashMessage.vue";
 import Camara from "@/components/icons/Camara.vue";
 import axios from "axios";
+import { Utilities } from "@/js/Utilities";
 
 import { onMounted, ref, onBeforeUnmount } from "vue";
 
 const canvas = ref(null);
 const video = ref(null);
 const ctx = ref(null);
+const message = ref(null);
 let animationFrameId = null;
+
+const close = () => {
+  Utilities.close(message);
+};
 
 const constraints = ref({
   audio: false,
@@ -37,41 +44,40 @@ const draw = () => {
 
 const storePicture = async () => {
   try {
-    const picture = canvas.value.toDataURL("image/png"); // Obtén la imagen en formato base64
-    const blob = await fetch(picture).then((res) => res.blob()); // Convierte la imagen a Blob para enviarla
+    const picture = canvas.value.toDataURL("image/png");
+    const blob = await fetch(picture).then((res) => res.blob());
     const formData = new FormData();
-    formData.append("file", blob, `imagen-${Date.now()}.png`); // Adjunta la imagen a formData
+    formData.append("file", blob, `imagen-${Date.now()}.png`);
 
-    // Envía la imagen al backend
-    await axios.post(`http://localhost:3000/api/imagenes/store`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
+    const response = await axios.post(
+      "http://localhost:3000/api/imagenes/store",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
 
-    console.log("Imagen almacenada correctamente");
+    message.value = response.data.msg;
+    
   } catch (error) {
     console.error("Error al almacenar la imagen:", error);
   }
-}; 
-
-const takePicture = () => {
-  const link = document.createElement("a");
-  link.download = `vue-cam-${new Date().toISOString()}.png`;
-  link.href = canvas.value.toDataURL();
-  link.click();
 };
 
 onMounted(async () => {
   if (video.value && canvas.value) {
     ctx.value = canvas.value.getContext("2d");
 
-    await navigator.mediaDevices
-      .getUserMedia(constraints.value)
-      .then(setStream)
-      .catch((e) => {
-        console.error(e);
-      });
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia(
+        constraints.value
+      );
+      setStream(stream);
+    } catch (e) {
+      console.error(e);
+    }
   }
 });
 
@@ -117,6 +123,13 @@ onBeforeUnmount(() => {
             </button>
           </div>
         </div>
+        <FlashMessage
+          v-if="message"
+          type="success"
+          :message="message"
+          title="Operación Exitosa"
+          @close="close"
+        />
       </div>
     </template>
   </AppLayout>

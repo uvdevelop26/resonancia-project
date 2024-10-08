@@ -119,6 +119,7 @@ onMounted(fechData);
         <FlashMessage
           v-if="message"
           type="success"
+          title="Operación exitosa"
           :message="message"
           @close="close"
         />
