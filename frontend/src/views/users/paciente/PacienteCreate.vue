@@ -47,7 +47,7 @@ const close = () => {
 /* to show in the select input */
 const departamentos = ref([]);
 const ciudades = ref([]);
-const roles = ref(null);
+const role = ref("");
 
 const message = ref("");
 
@@ -88,9 +88,13 @@ const store = async () => {
 /* Resquest data from the server */
 const fechData = async () => {
   try {
-    const response = await axios.get("http://localhost:3000/api/users/create");
+    const response = await axios.get(
+      "http://localhost:3000/api/users/paciente/create"
+    );
 
-    roles.value = response.data.roles;
+    role.value = response.data.role;
+
+    form.value.role_id = role.value.id;
 
     const departamentosData = response.data.departamentos;
 
@@ -112,7 +116,7 @@ const fechData = async () => {
 onMounted(fechData);
 </script>
 <template>
-  <AppLayout :title="`Crear Usuarios`">
+  <AppLayout :title="`Crear Paciente`">
     <template #content>
       <div class="w-full h-full overflow-y-auto flex flex-col gap-5 relative">
         <!-- flash message -->
@@ -127,8 +131,7 @@ onMounted(fechData);
         <div class="w-full rounded-lg bg-white shadow-md p-4 lg:p-6 mt-4">
           <form @submit.prevent="store" class="flex flex-col gap-4">
             <div
-              class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap"
-            >
+              class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap">
               <TextInput
                 label="Nombre"
                 type="text"
@@ -187,8 +190,7 @@ onMounted(fechData);
                 label="Sexo"
                 id="sexo"
                 :error="errors.sexo"
-                v-model="form.sexo"
-              >
+                v-model="form.sexo">
                 <template #options>
                   <option :value="null"></option>
                   <option value="femenino">Femenino</option>
@@ -198,15 +200,13 @@ onMounted(fechData);
               <SelectInput
                 label="Departamento"
                 id="departamento_id"
-                v-model="form.departamento_id"
-              >
+                v-model="form.departamento_id">
                 <template #options>
                   <option :value="null"></option>
                   <option
                     v-for="departamento in departamentos"
                     :key="departamento.id"
-                    :value="departamento.id"
-                  >
+                    :value="departamento.id">
                     {{ departamento.departamento_nombre }}
                   </option>
                 </template>
@@ -215,15 +215,13 @@ onMounted(fechData);
                 label="Ciudad"
                 id="ciudade_id"
                 :error="errors.ciudade_id"
-                v-model="form.ciudade_id"
-              >
+                v-model="form.ciudade_id">
                 <template #options>
                   <option :value="null"></option>
                   <option
                     v-for="ciudade in ciudades"
                     :key="ciudade.id"
-                    :value="ciudade.id"
-                  >
+                    :value="ciudade.id">
                     {{ ciudade.ciudade_nombre }}
                   </option>
                 </template>
@@ -254,18 +252,14 @@ onMounted(fechData);
                 id="role_id"
                 :error="errors.role_id"
                 v-model="form.role_id"
-              >
+                disabled>
                 <template #options>
-                  <option :value="null"></option>
-                  <option v-for="role in roles" :key="role.id" :value="role.id">
-                    {{ role.role_nombre }}
-                  </option>
+                  <option :value="role.id">{{ role.role_nombre }}</option>
                 </template>
               </SelectInput>
               <button
                 type="submit"
-                class="h-10 w-72 bg-primary text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8"
-              >
+                class="h-10 w-72 bg-primary text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8">
                 Agregar
               </button>
             </div>

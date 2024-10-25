@@ -16,7 +16,9 @@ const Utilities = {
     cleanForm: (form) => {
         if (isRef(form)) {
             for (let clave in form.value) {
-                form.value[clave] = "";
+                if (clave !== 'role_id') {
+                    form.value[clave] = "";
+                }
             }
         }
     },
@@ -39,7 +41,6 @@ const Utilities = {
         const formattedDate = moment(date).format("YYYY-MM-DD");
         return formattedDate;
     }
-
 
 }
 

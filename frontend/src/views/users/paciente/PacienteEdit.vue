@@ -11,11 +11,11 @@ import { Utilities } from "@/js/Utilities";
 const route = useRoute();
 
 /*  values */
-const roles = ref(null);
 const ciudades = ref([]);
 const departamentos = ref([]);
 const message = ref("");
 const errors = ref({});
+const role = ref({});
 
 /* form edit */
 const form = ref({
@@ -95,15 +95,15 @@ const fetchData = async () => {
 
   try {
     const response = await axios.get(
-      `http://localhost:3000/api/users/edit/${slug}`
+      `http://localhost:3000/api/users/paciente/edit/${slug}`
     );
 
     /* getting data */
-    roles.value = response.data.roles;
 
     const departamentosData = response.data.departamentos;
     const persona = response.data.persona;
     const user = response.data.user;
+    role.value = user.role;
 
     departamentosData.forEach((departamento) => {
       departamento.ciudades.forEach((ciudade) => {
@@ -152,10 +152,9 @@ const fetchData = async () => {
 onMounted(fetchData);
 </script>
 <template>
-  <AppLayout :title="`Editar Usuario`">
+  <AppLayout :title="`Editar Paciente`">
     <template #content>
       <div class="w-full h-full overflow-y-auto flex flex-col gap-5 relative">
-        <!-- flash message -->
         <FlashMessage
           v-if="message"
           type="success"
@@ -163,12 +162,10 @@ onMounted(fetchData);
           :message="message"
           @close="close"
         />
-        <!-- form -->
         <div class="w-full rounded-lg bg-white shadow-md p-4 lg:p-6 mt-4">
           <form @submit.prevent="update" class="flex flex-col gap-4">
             <div
-              class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap"
-            >
+              class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap">
               <TextInput
                 label="Nombre"
                 type="text"
@@ -283,12 +280,10 @@ onMounted(fetchData);
                 label="Rol"
                 id="role_id"
                 :error="errors.role_id"
-                v-model="form.role_id">
+                v-model="form.role_id"
+                disabled>
                 <template #options>
-                  <option :value="null"></option>
-                  <option v-for="role in roles" :key="role.id" :value="role.id">
-                    {{ role.role_nombre }}
-                  </option>
+                  <option :value="role.id">{{ role.role_nombre }}</option>
                 </template>
               </SelectInput>
               <button

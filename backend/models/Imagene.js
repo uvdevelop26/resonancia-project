@@ -10,6 +10,16 @@ module.exports = (sequelize, DataTypes) => {
         }
     });
 
+    Imagene.associate = (models) => {
+        
+        Imagene.belongsToMany(models.Examene, {
+            through: 'ExameneImagene',
+            foreignKey: 'imagene_id',
+            otherKey: 'examene_id',
+            as: 'examenes'
+        });
+    };
+
 
     return Imagene;
 

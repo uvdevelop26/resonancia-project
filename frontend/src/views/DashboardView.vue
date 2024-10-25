@@ -4,20 +4,19 @@ import { onMounted, ref } from "vue";
 import axios from "axios";
 
 const imagenes = ref([]);
-
+/* 
 const fetchImages = async () => {
   try {
     const response = await axios.get(`http://localhost:3000/api/imagenes/`);
 
     imagenes.value = response.data;
 
-    console.log(imagenes.value);
   } catch (error) {
     console.error("Error al eliminar el usuario:", error);
   }
 };
 
-onMounted(fetchImages);
+onMounted(fetchImages); */
 </script>
 
 <template>

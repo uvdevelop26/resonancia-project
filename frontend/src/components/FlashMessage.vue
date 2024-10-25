@@ -8,8 +8,9 @@ const props = defineProps({
   type: String,
   title: String,
   message: String,
-
 });
+
+const alertRef = ref(null);
 
 const customColor = computed(() => {
   if (props.type === "success") {
@@ -26,8 +27,6 @@ const close = () => {
   emit("close");
 };
 
-const alertRef = ref(null);
-
 onMounted(() => {
   gsap.fromTo(
     alertRef.value,
@@ -39,22 +38,24 @@ onMounted(() => {
 
 <template>
   <Modal :show="message" maxWidth="xs">
-    <div ref="alertRef"class="w-full h-40 p-4">
+    <div ref="alertRef" class="w-full h-40 p-4">
       <div class="flex items-center gap-2">
         <div
           class="w-7 h-7 rounded-full flex items-center justify-center"
           :class="{
-              'bg-green-600': customColor === 'green-600',
-              'bg-red-600': customColor === 'red-600',
-            }">
-          <AlertIcons :name="props.type" class="w-3 h-3 fill-white" />
+            'bg-green-600': customColor === 'green-600',
+            'bg-red-600': customColor === 'red-600',
+          }"
+        >
+          <AlertIcons :name="props.type" class="w-3 h-3 mb-1 fill-white" />
         </div>
         <p
           class="font-bold"
           :class="{
             'text-green-600': customColor === 'green-600',
             'text-red-600': customColor === 'red-600',
-          }">
+          }"
+        >
           {{ title }}
         </p>
       </div>
@@ -64,11 +65,14 @@ onMounted(() => {
           type="button"
           aria-label="close alert"
           @click="close"
-          class="w-16 h-8 rounded-lg text-sm text-white font-bold  "
+          class="w-16 h-8 rounded-lg text-sm text-white font-bold"
           :class="{
-              'bg-green-600 hover:text-green-600 hover:bg-green-200': customColor === 'green-600',
-              'bg-red-600 hover:text-red-600 hover:bg-red-200': customColor === 'red-600',
-            }">
+            'bg-green-600 hover:text-green-600 hover:bg-green-200':
+              customColor === 'green-600',
+            'bg-red-600 hover:text-red-600 hover:bg-red-200':
+              customColor === 'red-600',
+          }"
+        >
           Cerrar
         </button>
       </div>

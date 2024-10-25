@@ -3,25 +3,27 @@ import AppLayout from "@/components/layout/AppLayout.vue";
 import Edit from "@/components/icons/Edit.vue";
 import Delete from "@/components/icons/Delete.vue";
 import FlashMessage from "@/components/FlashMessage.vue";
-import Modal from "@/components/Modal.vue";
+import QuestionFlash from "@/components/QuestionFlash.vue";
+import SearchInput from "@/components/SearchInput.vue";
 import { ref, onMounted } from "vue";
 import { Utilities } from "@/js/Utilities";
 import axios from "axios";
 
 const users = ref([]);
 const message = ref("");
+const questionFlashIndex = ref(null);
+const search = ref("");
 
 const close = () => {
   Utilities.close(message);
 };
 
-const fetchUsers = async () => {
-  try {
-    const response = await axios.get("http://localhost:3000/api/users");
-    users.value = response.data;
-  } catch (error) {
-    console.error(error);
-  }
+const closeQuestiosFlash = () => {
+  questionFlashIndex.value = null;
+};
+
+const showQuestionFlash = (index) => {
+  questionFlashIndex.value = index;
 };
 
 const deleteUser = async (slug) => {
@@ -30,21 +32,37 @@ const deleteUser = async (slug) => {
       `http://localhost:3000/api/users/delete/${slug}`
     );
 
-    message.value = response.data.msg;
+    questionFlashIndex.value = null;
 
-    // Filtra el usuario eliminado de la lista de usuarios
+    setTimeout(() => {
+      message.value = response.data.msg;
+    }, 300);
+
+    /* Filtra el usuario eliminado de la lista de usuarios */
     users.value = users.value.filter((user) => user.personas[0].slug !== slug);
   } catch (error) {
     console.error("Error al eliminar el usuario:", error);
   }
 };
 
+const fetchUsers = async () => {
+  try {
+    const response = await axios.get(
+      "http://localhost:3000/api/users/paciente"
+    );
+    users.value = response.data;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 onMounted(fetchUsers);
 </script>
 <template>
-  <AppLayout :title="`Lista de Usuarios`">
+  <AppLayout :title="`Lista de Pacientes`">
     <template #content>
       <div class="w-full h-full overflow-y-auto flex flex-col gap-5 relative">
+        <!-- flash message -->
         <FlashMessage
           v-if="message"
           type="success"
@@ -53,15 +71,19 @@ onMounted(fetchUsers);
           @close="close"
         />
 
-        <div class="w-full flex justify-end items-center mt-4">
+        <!-- search bar -->
+        <div
+          class="w-full flex justify-between gap-2 items-center mt-4 md:gap-8"
+        >
+          <!--  <SearchInput v-model="search" /> -->
           <router-link
-            to="/users/create"
+            to="/users/pacientes/create"
             class="w-28 h-8 text-white font-bold bg-primary flex items-center justify-center rounded-lg shadow-lg hover:bg-primary-light hover:text-primary hover:border"
           >
             Crear
           </router-link>
         </div>
-
+        <!-- table -->
         <div class="w-full overflow-x-auto rounded-lg bg-white shadow-md">
           <table class="w-full text-sm whitespace-nowrap overflow-hidden">
             <thead>
@@ -89,12 +111,17 @@ onMounted(fetchUsers);
                 <th
                   class="py-3 px-4 text-gray-500 text-xs md:text-sm font-bold"
                 >
-                  Correo
+                  Ciudad
                 </th>
                 <th
                   class="py-3 px-4 text-gray-500 text-xs md:text-sm font-bold"
                 >
-                  Rol
+                  Dirección
+                </th>
+                <th
+                  class="py-3 px-4 text-gray-500 text-xs md:text-sm font-bold"
+                >
+                  Correo
                 </th>
                 <th
                   class="py-3 px-4 text-gray-500 text-xs md:text-sm font-bold"
@@ -117,27 +144,37 @@ onMounted(fetchUsers);
                 <td
                   class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100"
                 >
-                  {{ user.personas[0].nombre }}
+                  {{ user.personas?.[0]?.nombre || "Nombre no disponible" }}
                 </td>
                 <td
                   class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100"
                 >
-                  {{ user.personas[0].apellido }}
+                  {{ user.personas?.[0]?.apellido || "Apellido no disponible" }}
                 </td>
                 <td
                   class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100"
                 >
-                  {{ user.personas[0].dni }}
+                  {{ user.personas?.[0]?.dni || "DNI no disponible" }}
                 </td>
                 <td
                   class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100"
                 >
-                  {{ user.email }}
+                  {{
+                    user.personas?.[0]?.ciudade?.ciudade_nombre ||
+                    "Ciudad no disponible"
+                  }}
                 </td>
                 <td
                   class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100"
                 >
-                  {{ user.role.role_nombre }}
+                  {{
+                    user.personas?.[0]?.direccion || "Dirección no disponible"
+                  }}
+                </td>
+                <td
+                  class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100"
+                >
+                  {{ user.email || "Correo no disponible" }}
                 </td>
                 <td
                   class="py-1 px-1 text-sm md:text-xs bg-white group-hover:bg-gray-100"
@@ -146,19 +183,28 @@ onMounted(fetchUsers);
                     class="w-full h-full flex items-center justify-center gap-2"
                   >
                     <router-link
-                      :to="`/users/edit/${user.personas[0].slug}`"
+                      :to="`/users/pacientes/edit/${
+                        user.personas?.[0]?.slug || ''
+                      }`"
                       class="inline-block border bg-primary-light px-3 py-3 rounded-full bg-light-green-two hover:shadow-md"
                     >
                       <Edit class="w-3 h-3 fill-primary" />
                     </router-link>
                     <button
-                      @click="deleteUser(user.personas[0].slug)"
+                      @click="showQuestionFlash(index)"
                       class="inline-block border bg-primary-light px-3 py-3 rounded-full bg-light-green-two hover:shadow-md"
                     >
                       <Delete class="w-3 h-3 fill-primary" />
                     </button>
                   </div>
                 </td>
+                <QuestionFlash
+                  :show="questionFlashIndex === index"
+                  title="¿Desea eliminar este usuario?"
+                  :data="user.personas?.[0] || {}"
+                  @continues="deleteUser(user.personas?.[0]?.slug)"
+                  @close="closeQuestiosFlash"
+                />
               </tr>
             </tbody>
           </table>

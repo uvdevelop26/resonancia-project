@@ -9,6 +9,11 @@ module.exports = {
         role_nombre: "Administrador",
         createdAt: new Date(),
         updatedAt: new Date(),
+      },
+      {
+        role_nombre: "Paciente",
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }
     ]);
   },

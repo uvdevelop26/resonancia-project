@@ -5,35 +5,52 @@ const UserController = {
 
     getUsers: async (req, res) => {
         try {
+            const { type } = req.params;
+
+            const role = await Role.findOne({ where: { role_nombre: type } });
+
+            if (!role) {
+                return res.status(400).json({ msg: "Rol no encontrado" });
+            }
 
             const users = await User.findAll({
+                where: { role_id: role.id },
                 include: [
                     {
                         model: Persona,
-                        as: 'personas'
+                        as: 'personas',
+                        include: [
+                            {
+                                model: Ciudade,
+                                as: 'ciudade'
+                            }
+                        ]
                     },
-                    {
-                        model: Role,
-                        as: 'role'
-                    }
                 ]
             });
 
             if (!users) {
-                return res.status(400).json({ msg: "Usuarios no encontrados" });
+                return res.status(404).json({ msg: "Usuarios no encontrados" });
             }
 
             return res.status(200).json(users);
 
         } catch (error) {
-            return res.status(500).json({ msg: "Usuarios no encontrados" });
+            return res.status(500).json({ msg: "Error al buscar usuarios" });
         }
     },
 
     createUser: async (req, res) => {
         try {
 
-            const roles = await Role.findAll();
+            const { type } = req.params;
+
+            const role = await Role.findOne({ where: { role_nombre: type } });
+
+            if (!role) {
+                return res.status(400).json({ msg: "Rol no encontrado" });
+            }
+
             const departamentos = await Departamento.findAll({
                 include: {
                     model: Ciudade,
@@ -41,11 +58,11 @@ const UserController = {
                 },
             });
 
-            if (!roles || !departamentos) {
+            if (!role || !departamentos) {
                 return res.status(400).json({ msg: "Error en el servidor" });
             }
 
-            return res.status(200).json({ roles, departamentos });
+            return res.status(200).json({ role, departamentos });
 
         } catch (error) {
             return res.status(500).json({ msg: "Error en el servidor" });
@@ -102,10 +119,16 @@ const UserController = {
             const { slug } = req.params;
 
             const persona = await Persona.findOne({ where: { slug: slug } });
-            const user = await User.findOne({ where: { id: persona.user_id } });
+
+            const user = await User.findOne({
+                where: { id: persona.user_id },
+                include: {
+                    model: Role,
+                    as: 'role'
+                }
+            });
 
             /* finding data */
-            const roles = await Role.findAll();
             const departamentos = await Departamento.findAll({
                 include: {
                     model: Ciudade,
@@ -113,11 +136,11 @@ const UserController = {
                 },
             });
 
-            if (!roles || !departamentos || !persona || !user) {
+            if (!departamentos || !persona || !user) {
                 return res.status(400).json({ msg: "Error en el servidor" });
             }
 
-            return res.status(200).json({ user, persona, roles, departamentos });
+            return res.status(200).json({ user, persona, departamentos });
 
         } catch (error) {
             return res.status(500).json({ msg: "Error en el servidor" });
@@ -191,7 +214,7 @@ const UserController = {
             /* deleting */
             await persona.destroy();
             await user.destroy();
-            
+
 
             res.status(200).json({ msg: "Usuario eliminado exitosamente" });
 

@@ -2,7 +2,7 @@ const express = require('express');
 const AuthController = require('../controllers/AuthController');
 const AuthValidator = require('../validators/AuthValidator');
 const { validationResult } = require('express-validator');
-
+const AuthMiddleware = require('../middlewares/AuthMiddleware');
 
 const router = express.Router();
 
@@ -14,10 +14,7 @@ router.post('/login', AuthValidator(), (req, res, next) => {
     next();
 }, AuthController.login);
 
-router.get('/auth')
-
+// Ruta protegida para obtener la información del usuario
+router.get('/userinfo', AuthMiddleware, AuthController.getUserInfo);
 
 module.exports = router;
-
-
-

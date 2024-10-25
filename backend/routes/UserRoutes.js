@@ -6,9 +6,10 @@ const { validationResult } = require('express-validator');
 
 const router = express.Router();
 
-router.get('/', UserController.getUsers);
 
-router.get('/create', UserController.createUser);
+router.get('/:type', UserController.getUsers);
+
+router.get('/:type/create', UserController.createUser);
 
 router.post('/store', UserValidator.store, (req, res, next) => {
     const errors = validationResult(req);
@@ -18,8 +19,7 @@ router.post('/store', UserValidator.store, (req, res, next) => {
     next();
 }, UserController.storeUser);
 
-
-router.get('/edit/:slug', UserController.editUser);
+router.get('/:type/edit/:slug', UserController.editUser);
 
 router.put('/update/:slug', UserValidator.update, (req, res, next) => {
     const errors = validationResult(req);
@@ -29,10 +29,7 @@ router.put('/update/:slug', UserValidator.update, (req, res, next) => {
     next();
 }, UserController.updateUser);
 
-
 router.delete('/delete/:slug', UserController.deleteUser);
-
-
 
 module.exports = router;
 
