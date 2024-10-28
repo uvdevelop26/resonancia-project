@@ -8,37 +8,27 @@ import axios from "axios";
 import { useRoute } from "vue-router";
 import { Utilities } from "@/js/Utilities";
 import { useRouter } from "vue-router";
+import { Constants } from "@/js/Contants";
 
 const router = useRouter();
 
 const route = useRoute();
 const examene = ref({});
-const fechaExamene = ref("");
-const user = ref("");
-const resultado = ref("");
-const urls = ref([]);
-const users = ref({});
 const questionFlash = ref(false);
-const exameneTot = ref({});
 const message = ref("");
 
-const url = (directory) => {
-  const url = `http://localhost:3000${directory}`;
-  return url;
-};
-
-const showQuestionFlash = () => {
-  questionFlash.value = true;
-};
-
-const close = () => {
-  questionFlash.value = false;
-};
+const form = ref({
+  id: "",
+  fecha_examene: "",
+  paciente: "",
+  resultado: "",
+  urls: [],
+});
 
 const deleteExamen = async () => {
   try {
     const response = await axios.delete(
-      `http://localhost:3000/api/examenes/delete/${exameneTot.value.id}`
+      `${Constants.serverPath}/api/examenes/delete/${form.value.id}`
     );
 
     message.value = response.data.msg;
@@ -47,7 +37,6 @@ const deleteExamen = async () => {
       path: "/examenes",
       query: { message: response.data.msg },
     });
-      
   } catch (error) {
     console.error("Error al cargar el examen:", error);
   }
@@ -58,21 +47,24 @@ const fetchData = async () => {
     const { id } = route.params;
 
     const response = await axios.get(
-      `http://localhost:3000/api/examenes/show/${id}`
+      `${Constants.serverPath}/api/examenes/show/${id}`
     );
 
     const examene = response.data;
-    exameneTot.value = examene;
-
-    fechaExamene.value = Utilities.getFormattedDate(examene.fecha_examene);
-    users.value = examene.user;
-    user.value = `${examene.user.personas[0].nombre} ${examene.user.personas[0].apellido}`;
-    resultado.value = examene.resultado;
+    let imagenes = [];
 
     examene.imagenes.forEach((image) => {
       const url = image.url;
-      urls.value.push(url);
+      imagenes.push(url);
     });
+
+    form.value = {
+      id: examene.id,
+      fecha_examene: Utilities.getFormattedDate(examene.fecha_examene),
+      paciente: `${examene.user.personas[0].nombre} ${examene.user.personas[0].apellido}`,
+      resultado: examene.resultado,
+      urls: imagenes,
+    };
   } catch (error) {
     console.error("Error al cargar el examen:", error);
   }
@@ -88,50 +80,46 @@ onMounted(fetchData);
         <QuestionFlash
           :show="questionFlash"
           title="¿Desea eliminar este Examen?"
-          @close="close"
+          :data="`Eliminar examen fecha ${form.fecha_examene}`"
+          @close="questionFlash = false"
           @continues="deleteExamen()"
         />
         <div class="w-full rounded-lg bg-white shadow-md p-4 lg:p-6 mt-4">
           <form class="flex flex-col gap-4">
             <div
-              class="flex flex-col gap-4 w-full items-center md:flex-row md:items-start md:flex-wrap"
-            >
+              class="flex flex-col gap-4 w-full items-center md:flex-row md:items-start md:flex-wrap">
               <TextInput
                 label="Fecha"
                 type="date"
                 id="fecha_examen"
-                v-model="fechaExamene"
+                v-model="form.fecha_examene"
                 :disabled="true"
               />
-
               <TextInput
                 label="Paciente"
                 type="text"
                 id="user"
-                v-model="user"
+                v-model="form.paciente"
                 :disabled="true"
               />
               <TextArea
                 label="Resultados"
                 id="resultado"
-                v-model="resultado"
+                v-model="form.resultado"
                 placeholder="Los resultados se generarán en segundos.."
                 :disabled="true"
               />
-
               <div class="flex flex-col gap-2 w-full relative">
                 <div class="font-bold">Imágenes:</div>
                 <ul
-                  v-if="urls"
-                  class="h-52 w-full flex gap-2 overflow-x-auto flex-nowrap"
-                >
+                  v-if="form.urls"
+                  class="h-52 w-full flex gap-2 overflow-x-auto flex-nowrap">
                   <li
-                    v-for="(urlimg, index) in urls"
+                    v-for="(urlimg, index) in form.urls"
                     :key="index"
-                    class="w-64 h-full relative border-2 flex-shrink-0 shadow-md"
-                  >
+                    class="w-64 h-full relative border-2 flex-shrink-0 shadow-md">
                     <img
-                      :src="url(urlimg)"
+                      :src="Utilities.absolutePath(urlimg)"
                       alt="Previsualización"
                       class="w-full h-full object-cover"
                     />
@@ -142,9 +130,8 @@ onMounted(fetchData);
             <div class="flex flex-col gap-4 w-full items-center md:flex-row">
               <button
                 type="button"
-                @click="showQuestionFlash()"
-                class="h-10 w-72 bg-red-500 self-center text-white shadow font-bold rounded-lg text-sm hover:bg-red-200 hover:text-red-500 md:mt-8"
-              >
+                @click="questionFlash = true"
+                class="h-10 w-72 bg-red-500 self-center text-white shadow font-bold rounded-lg text-sm hover:bg-red-200 hover:text-red-500 md:mt-8">
                 Eliminar
               </button>
             </div>

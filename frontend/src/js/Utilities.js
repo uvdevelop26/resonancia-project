@@ -1,9 +1,8 @@
 import { isRef } from "vue"
 import moment from "moment-timezone";
-
+import { Constants } from "./Contants";
 
 const Utilities = {
-
     close: (message) => {
 
         if (isRef(message)) {
@@ -16,10 +15,14 @@ const Utilities = {
     cleanForm: (form) => {
         if (isRef(form)) {
             for (let clave in form.value) {
-                if (clave !== 'role_id') {
+                if (Array.isArray(form.value[clave])) {
+                    form.value[clave] = [];
+                } else {
                     form.value[clave] = "";
                 }
             }
+        } else {
+            console.error("Error al limpiar el formulario");
         }
     },
 
@@ -40,6 +43,26 @@ const Utilities = {
     getFormattedDate: (date) => {
         const formattedDate = moment(date).format("YYYY-MM-DD");
         return formattedDate;
+    },
+
+    absolutePath: (path) => {
+        return `${Constants.serverPath + path}`
+    },
+
+    shortingString: (textstring) => {
+        let substring;
+
+        if (textstring.length > 30) {
+            substring = textstring.substring(0, 30);
+
+            return `${substring} ...ver más`;
+        } else {
+            substring = textstring;
+
+            return substring;
+        }
+
+
     }
 
 }

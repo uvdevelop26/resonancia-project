@@ -27,13 +27,6 @@ const close = () => {
   emit("close");
 };
 
-onMounted(() => {
-  gsap.fromTo(
-    alertRef.value,
-    { scale: 0.5, opacity: 0 },
-    { scale: 1, opacity: 1, duration: 0.6, ease: "power2.out" }
-  );
-});
 </script>
 
 <template>
@@ -45,8 +38,7 @@ onMounted(() => {
           :class="{
             'bg-green-600': customColor === 'green-600',
             'bg-red-600': customColor === 'red-600',
-          }"
-        >
+          }">
           <AlertIcons :name="props.type" class="w-3 h-3 mb-1 fill-white" />
         </div>
         <p
@@ -54,8 +46,7 @@ onMounted(() => {
           :class="{
             'text-green-600': customColor === 'green-600',
             'text-red-600': customColor === 'red-600',
-          }"
-        >
+          }">
           {{ title }}
         </p>
       </div>
@@ -71,8 +62,7 @@ onMounted(() => {
               customColor === 'green-600',
             'bg-red-600 hover:text-red-600 hover:bg-red-200':
               customColor === 'red-600',
-          }"
-        >
+          }">
           Cerrar
         </button>
       </div>

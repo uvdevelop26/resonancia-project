@@ -7,7 +7,7 @@ import Modal from "./Modal.vue";
 const props = defineProps({
   show: Boolean,
   title: String,
-  data: Object,
+  data: String,
 });
 
 const emit = defineEmits(["close", "continues"]);
@@ -32,8 +32,8 @@ const continues = () => {
           {{ title }}
         </p>
       </div>
-      <p class="pt-3 pb-4 text-center">
-        Eliminar de la lista
+      <p class="pt-3 pb-4 text-center text-sm">
+          {{ data }}
       </p>
       <div class="flex gap-4 pt-4 border-t justify-center">
         <button

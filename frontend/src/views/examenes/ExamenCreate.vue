@@ -6,6 +6,7 @@ import TextArea from "@/components/TextArea.vue";
 import SearchInput from "@/components/SearchInput.vue";
 import FlashMessage from "@/components/FlashMessage.vue";
 import { Utilities } from "@/js/Utilities";
+import { Constants } from "@/js/Contants";
 import { onMounted, ref, watchEffect } from "vue";
 import axios from "axios";
 
@@ -26,19 +27,10 @@ const close = () => {
   Utilities.close(message);
 };
 
-
 const cleanFormEx = () => {
-  for (let clave in form.value) {
-    if (Array.isArray(form.value[clave])) {
-      form.value[clave] = [];
-    } else {
-      form.value[clave] = "";
-    }
-  }
-
+  Utilities.cleanForm(form);
   search.value = "";
   handlePreview.value = true;
-
 };
 
 const action = () => {
@@ -57,7 +49,6 @@ const action = () => {
 
 watchEffect(() => {
   const value = search.value;
-
   if (!value) {
     form.value.user_id = "";
   }
@@ -76,7 +67,7 @@ const store = async () => {
 
   try {
     const response = await axios.post(
-      "http://localhost:3000/api/examenes/store",
+      `${Constants.serverPath}/api/examenes/store`,
       formData,
       {
         headers: {
@@ -86,8 +77,6 @@ const store = async () => {
     );
 
     cleanFormEx();
-
-    console.log(response.data.msg)
 
     message.value = response.data.msg;
 
@@ -116,7 +105,7 @@ const store = async () => {
 const fetchData = async () => {
   try {
     const response = await axios.get(
-      "http://localhost:3000/api/examenes/create"
+      `${Constants.serverPath}/api/examenes/create`
     );
 
     pacientes.value = response.data;
@@ -142,8 +131,7 @@ onMounted(fetchData);
         <div class="w-full rounded-lg bg-white shadow-md p-4 lg:p-6 mt-4">
           <form @submit.prevent="store" class="flex flex-col gap-4">
             <div
-              class="flex flex-col gap-4 w-full items-center md:flex-row md:items-start md:flex-wrap"
-            >
+              class="flex flex-col gap-4 w-full items-center md:flex-row md:items-start md:flex-wrap">
               <TextInput
                 label="Fecha"
                 type="date"
@@ -184,8 +172,7 @@ onMounted(fetchData);
             <div class="flex flex-col gap-4 w-full items-center md:flex-row">
               <button
                 type="submit"
-                class="h-10 w-72 bg-primary self-center text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8"
-              >
+                class="h-10 w-72 bg-primary self-center text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8">
                 Guardar
               </button>
             </div>
