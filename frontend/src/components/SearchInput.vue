@@ -1,6 +1,6 @@
 <script setup>
 import Search from "./icons/Search.vue";
-import { ref, watchEffect, defineEmits, computed } from "vue";
+import { ref, watchEffect, computed } from "vue";
 
 const props = defineProps({
   placeholder: String,

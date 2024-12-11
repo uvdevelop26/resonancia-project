@@ -1,125 +1,84 @@
 <script setup>
-import { ref, defineEmits, computed, watchEffect } from "vue";
-import Upload from "./icons/Upload.vue";
+import { ref } from "vue";
 import Close from "./icons/Close.vue";
-
+//muestra modal
 const props = defineProps({
-  id: String,
-  accept: String,
-  label: String,
-  multiple: Boolean,
-  placeholder: String,
-  error: Array,
-  maxWidth: {
-    type: String,
-    default: "2xl",
-  },
-  cleanPreview: Boolean,
+  show: false,
+  images: Array,
 });
 
-const photosPreview = ref([]);
-const fileNames = ref([]);
-const filesArray = ref([]);
+const modalShow = ref(false);
+const photo = ref(null);
 
-const emit = defineEmits(["update:modelValue"]);
-
-const fileHandler = (event) => {
-  const files = event.target.files;
-  if (!files.length) return;
-
-  const filesArrayTmp = [];
-
-  for (const file of files) {
-    fileNames.value.push(file.name);
-    filesArrayTmp.push(file);
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      photosPreview.value.push(e.target.result);
-    };
-    reader.readAsDataURL(file);
-  }
-
-  filesArray.value = filesArrayTmp;
-  emit("update:modelValue", filesArray.value);
+const showModalImg = (index) => {
+  modalShow.value = true;
+  photo.value = props.images[index];
 };
 
-watchEffect(() => {
-  const photosPreviewState = props.cleanPreview;
-
-  if (photosPreviewState === true) {
-    photosPreview.value = [];
-  }
-});
-
-const maxWidthClass = computed(() => {
-  return {
-    xs: "sm:max-w-xs",
-    sm: "sm:max-w-sm",
-    md: "sm:max-w-md",
-    lg: "sm:max-w-lg",
-    xl: "sm:max-w-xl",
-    "2xl": "sm:max-w-2xl",
-  }[props.maxWidth];
-});
-
-const errorClasess = computed(() => {
-  return props.error ? "border-b-red-500" : "";
-});
-
-const deleteImg = (index) => {
-  photosPreview.value.splice(index, 1);
-  fileNames.value.splice(index, 1);
-  filesArray.value.splice(index, 1);
-  emit("update:modelValue", filesArray.value);
+const closeModal = () => {
+  modalShow.value = false;
+  photo.value = null;
 };
+
+/* const removeImg = (index) => {
+    emit("remove", index);
+
+}; */
+
+const emit = defineEmits(["remove"]);
 </script>
 <template>
-  <div class="flex flex-col gap-2 w-full relative" :class="maxWidthClass">
-    <span class="font-bold">{{ label }}:</span>
-    <!-- input -->
-    <label
-      :for="id"
-      class="w-full block h-10 px-2 overflow-hidden relative border-b cursor-pointer bg-gray-100"
-      :class="errorClasess">
-      <Upload
-        class="w-5 h-5 absolute top-1/2 -translate-y-1/2 left-2 fill-gray-400"
-      />
-      <input
-        type="file"
-        :accept="accept"
-        :id="id"
-        class="opacity-0 absolute -z-10"
-        :multiple="multiple"
-        @change="fileHandler"
-      />
-      <span
-        class="absolute w-28 top-1/2 -translate-y-1/2 text-xs text-gray-400 italic left-10">
-        {{ placeholder }}
-      </span>
-    </label>
-    <!-- error -->
-    <div v-if="error" class="text-xs text-red-500">{{ error[0].msg }}</div>
-    <!-- previsualizer -->
-    <ul
-      v-if="photosPreview.length > 0"
-      class="h-32 w-full flex gap-2 overflow-x-auto flex-nowrap">
+  <div v-if="show">
+    <!-- normal mode -->
+    <ul class="h-32 w-full flex gap-2 overflow-x-auto flex-nowrap">
       <li
-        v-for="(photo, index) in photosPreview"
+        v-for="(image, index) in images"
         :key="index"
-        class="w-32 h-full relative border-2 flex-shrink-0 shadow-md">
+        @click="showModalImg(index)"
+        class="w-32 h-full relative border-2 flex-shrink-0 shadow-md cursor-pointer"
+      >
         <img
-          :src="photo"
+          :src="image"
           alt="Previsualización"
           class="w-full h-full object-cover"
         />
         <button
           type="button"
           class="absolute bottom-4 right-4 w-6 h-6 flex items-center justify-center rounded-full bg-primary hover:shadow-xl"
-          @click="deleteImg(index)">
+          @click.stop="$emit('remove', index)"
+        >
           <Close class="w-3 h-3 fill-white" />
         </button>
       </li>
     </ul>
+
+    <!-- modal mode -->
+    <div
+      class="fixed inset-0 flex items-center justify-center px-4 py-6 sm:px-0 z-50 transition-all duration-200"
+      v-if="show && modalShow"
+    >
+      <transition>
+        <div
+          v-show="show && modalShow"
+          class="fixed inset-0 bg-gray-500 opacity-50"
+        ></div>
+      </transition>
+      <div
+        class="h-96 w-full sm:max-w-md bg-white rounded-lg overflow-hidden shadow-xl transform transition-all relative"
+      >
+        <button
+          type="button"
+          class="absolute top-4 right-4 w-6 h-6 flex items-center justify-center rounded-full bg-primary hover:shadow-xl"
+          @click="closeModal"
+        >
+          <Close class="w-3 h-3 fill-white" />
+        </button>
+        <img
+          :src="photo"
+          alt="Previsualización"
+          class="w-full h-full object-cover"
+        />
+      </div>
+    </div>
   </div>
 </template>

@@ -85,6 +85,7 @@ onMounted(fetchUserData);
             </div>
           </div>
         </header>
+        <!-- slot, render the component -->
         <div class="w-full h-full overflow-y-auto">
           <slot name="content" />
         </div>

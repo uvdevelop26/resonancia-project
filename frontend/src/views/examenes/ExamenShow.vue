@@ -73,7 +73,7 @@ const fetchData = async () => {
 onMounted(fetchData);
 </script>
 <template>
-  <AppLayout :title="`Examen ${examene.fecha_examene}`">
+  <AppLayout :title="`Examen ${Utilities.getFormattedDate(examene.fecha_examene)}`">
     <template #content>
       <div class="w-full h-full overflow-y-auto flex flex-col gap-5 relative">
         <!-- question flas -->
@@ -94,6 +94,7 @@ onMounted(fetchData);
                 id="fecha_examen"
                 v-model="form.fecha_examene"
                 :disabled="true"
+                maxWidth="xs"
               />
               <TextInput
                 label="Paciente"
@@ -101,6 +102,7 @@ onMounted(fetchData);
                 id="user"
                 v-model="form.paciente"
                 :disabled="true"
+                maxWidth="xs"
               />
               <TextArea
                 label="Resultados"
@@ -108,6 +110,7 @@ onMounted(fetchData);
                 v-model="form.resultado"
                 placeholder="Los resultados se generarán en segundos.."
                 :disabled="true"
+                maxWidth="xs"
               />
               <div class="flex flex-col gap-2 w-full relative">
                 <div class="font-bold">Imágenes:</div>

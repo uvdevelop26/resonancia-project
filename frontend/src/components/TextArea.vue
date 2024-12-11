@@ -36,12 +36,12 @@ const maxWidthClass = computed(() => {
 defineEmits(["update:modelValue"]);
 </script>
 <template>
-  <div class="flex flex-col gap-2" :class="maxWidthClass">
+  <div class="flex flex-col gap-2 w-full" :class="maxWidthClass">
     <label :for="id" class="font-bold">{{ label }}:</label>
     <textarea
       :value="modelValue"
       :id="id"
-      class="h-32 w-72 p-2 text-sm text-primary border-b bg-gray-100 placeholder:text-xs placeholder:italic focus:outline-none"
+      class="h-32 w-full p-2 text-sm text-primary border-b bg-gray-100 placeholder:text-xs placeholder:italic focus:outline-none"
       :class="[errorClasess, disabledClasses]"
       :placeholder="placeholder"
       :disabled="disabled"

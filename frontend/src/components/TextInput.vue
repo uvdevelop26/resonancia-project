@@ -39,11 +39,11 @@ const errorClasess = computed(() => {
 });
 </script>
 <template>
-  <div class="flex flex-col gap-2" :class="maxWidthClass">
+  <div class="flex flex-col gap-2 w-full" :class="maxWidthClass">
     <label :for="id" class="font-bold">{{ label }}:</label>
     <input
       :type="type"
-      class="h-9 w-72 px-2 text-sm text-primary bg-gray-100 border-b placeholder:text-xs placeholder:italic focus:outline-none"
+      class="h-9 w-full px-2 text-sm text-primary bg-gray-100 border-b placeholder:text-xs placeholder:italic focus:outline-none"
       :class="[disabledClasses, errorClasess]"
       :id="id"
       :value="modelValue"

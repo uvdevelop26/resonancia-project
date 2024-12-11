@@ -1,7 +1,6 @@
 <script setup>
 import AppLayout from "@/components/layout/AppLayout.vue";
 import TextInput from "@/components/TextInput.vue";
-import ImageViewer from "@/components/ImageViewer.vue";
 import TextArea from "@/components/TextArea.vue";
 import SearchInput from "@/components/SearchInput.vue";
 import FlashMessage from "@/components/FlashMessage.vue";
@@ -9,6 +8,7 @@ import { Utilities } from "@/js/Utilities";
 import { Constants } from "@/js/Contants";
 import { onMounted, ref, watchEffect } from "vue";
 import axios from "axios";
+import FileInput from "@/components/FileInput.vue";
 
 const pacientes = ref([]);
 const search = ref("");
@@ -128,6 +128,7 @@ onMounted(fetchData);
           :message="message"
           @close="close"
         />
+        <!-- form -->
         <div class="w-full rounded-lg bg-white shadow-md p-4 lg:p-6 mt-4">
           <form @submit.prevent="store" class="flex flex-col gap-4">
             <div
@@ -138,6 +139,7 @@ onMounted(fetchData);
                 id="fecha_examen"
                 v-model="form.fecha_examene"
                 :error="errors.fecha_examene"
+                maxWidth="xs"
               />
               <SearchInput
                 placeholder="Ingresa nombre, apellido o CI. Selecciona en la lista"
@@ -150,7 +152,7 @@ onMounted(fetchData);
                 @action="action"
                 maxWidth="xs"
               />
-              <ImageViewer
+              <FileInput
                 label="Selecciona Archivo"
                 id="url"
                 accept=".jpeg, .jpg, .png"
@@ -164,6 +166,7 @@ onMounted(fetchData);
               <TextArea
                 label="Resultados"
                 id="resultado"
+                maxWidth="xs"
                 v-model="form.resultado"
                 :error="errors.resultado"
                 placeholder="Los resultados se generarán en segundos.."

@@ -5,7 +5,7 @@ import PacienteUser from "@/components/icons/PacienteUser.vue";
 import gsap from "gsap";
 
 const beforeEnter = (el) => {
-  el.style.transform = "translateY(60px)";
+  el.style.transform = "translateY(40px)";
   el.style.opacity = 0;
 };
 

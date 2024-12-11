@@ -172,6 +172,7 @@ onMounted(fetchData);
                 id="nombre"
                 :error="errors.nombre"
                 v-model="form.nombre"
+                maxWidth="xs"
                 @input="getSlug()"
               />
               <TextInput
@@ -180,6 +181,7 @@ onMounted(fetchData);
                 id="apellidos"
                 :error="errors.apellidos"
                 v-model="form.apellido"
+                maxWidth="xs"
                 @input="getSlug()"
               />
               <TextInput
@@ -188,13 +190,15 @@ onMounted(fetchData);
                 id="slug"
                 :error="errors.slug"
                 v-model="form.slug"
+                maxWidth="xs"
                 disabled="true"
               />
-              <TextInput label="DNI" type="text" id="dni" v-model="form.dni" />
+              <TextInput label="DNI" type="text" id="dni" v-model="form.dni"  maxWidth="xs" />
               <TextInput
                 label="Teléfono"
                 type="text"
                 id="telefono"
+                maxWidth="xs"
                 :error="errors.telefono"
                 v-model="form.telefono"
               />
@@ -202,6 +206,7 @@ onMounted(fetchData);
                 label="Fecha de Nacimiento"
                 type="date"
                 id="fecha_nacimiento"
+                maxWidth="xs"
                 :error="errors.fecha_nacimiento"
                 v-model="form.fecha_nacimiento"
               />
@@ -211,12 +216,14 @@ onMounted(fetchData);
                 id="edad"
                 min="1"
                 max="100"
+                maxWidth="xs"
                 :error="errors.edad"
                 v-model="form.edad"
               />
               <SelectInput
                 label="Sexo"
                 id="sexo"
+                maxWidth="xs"
                 :error="errors.sexo"
                 v-model="form.sexo">
                 <template #options>
@@ -228,6 +235,7 @@ onMounted(fetchData);
               <SelectInput
                 label="Departamento"
                 id="departamento_id"
+                maxWidth="xs"
                 v-model="form.departamento_id">
                 <template #options>
                   <option :value="null"></option>
@@ -242,6 +250,7 @@ onMounted(fetchData);
               <SelectInput
                 label="Ciudad"
                 id="ciudade_id"
+                maxWidth="xs"
                 :error="errors.ciudade_id"
                 v-model="form.ciudade_id">
                 <template #options>
@@ -258,6 +267,7 @@ onMounted(fetchData);
                 label="Dirección"
                 type="text"
                 id="direccion"
+                maxWidth="xs"
                 :error="errors.direccion"
                 v-model="form.direccion"
               />
@@ -265,6 +275,7 @@ onMounted(fetchData);
                 label="Correo"
                 type="email"
                 id="email"
+                maxWidth="xs"
                 :error="errors.email"
                 v-model="form.email"
               />
@@ -272,6 +283,7 @@ onMounted(fetchData);
                 label="Contraseña"
                 type="password"
                 id="password"
+                maxWidth="xs"
                 placeholder="Déjala en blanco si no deseas cambiarla"
                 :error="errors.password"
                 v-model="form.password"
@@ -279,6 +291,7 @@ onMounted(fetchData);
               <SelectInput
                 label="Rol"
                 id="role_id"
+                maxWidth="xs"
                 :error="errors.role_id"
                 v-model="form.role_id"
                 disabled>

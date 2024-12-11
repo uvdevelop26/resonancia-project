@@ -23,6 +23,22 @@ const close = () => {
   showDeleteSuccess.value = false;
 };
 
+const beforeEnter = (el) => {
+  el.style.transform = "translateY(60px)"; 
+  el.style.opacity = 0;
+};
+
+const enter = (el, done) => {
+  gsap.to(el, {
+    duration: 0.6,
+    y: 0, 
+    opacity: 1,
+    onComplete: done,
+    delay: el.dataset.index * 0.1,
+    ease: "power3.out"
+  });
+};
+
 const fetchData = async () => {
   try {
     const userResponse = await axios.get(
@@ -54,28 +70,11 @@ const fetchData = async () => {
   }
 };
 
-const beforeEnter = (el) => {
-  el.style.transform = "translateY(60px)"; 
-  el.style.opacity = 0;
-};
-
-const enter = (el, done) => {
-  gsap.to(el, {
-    duration: 0.6,
-    y: 0, 
-    opacity: 1,
-    onComplete: done,
-    delay: el.dataset.index * 0.1,
-    ease: "power3.out"
-  });
-};
-
-
 onMounted(fetchData);
 </script>
 
 <template>
-  <AppLayout title="Análisis Realizados">
+  <AppLayout title="Exámenes Realizados">
     <template #content>
       <div class="w-full h-full overflow-y-auto flex flex-col gap-5 relative">
         <!-- mesage flash -->
@@ -95,6 +94,7 @@ onMounted(fetchData);
             Nuevo
           </router-link>
         </div>
+        <!-- cards -->
         <transition-group
           tag="div"
           class="flex flex-col gap-2 md:flex-row md:flex-wrap md:gap-6"

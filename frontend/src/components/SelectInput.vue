@@ -32,10 +32,10 @@ const errorClasess = computed(() => {
 defineEmits(["update:modelValue"]);
 </script>
 <template>
-  <div class="flex flex-col gap-2" :class="maxWidthClass">
+  <div class="flex flex-col w-full gap-2" :class="maxWidthClass">
     <label :for="id" class="font-bold">{{ label }}:</label>
     <select
-      class="h-9 w-72 px-2 text-sm text-primary bg-gray-100 border-b cursor-pointer placeholder:text-xs placeholder:italic focus:outline-none"
+      class="h-9 w-full px-2 text-sm text-primary bg-gray-100 border-b cursor-pointer placeholder:text-xs placeholder:italic focus:outline-none"
       :class="errorClasess"
       :value="modelValue"
       :id="id"

@@ -4,16 +4,22 @@ const fs = require('fs');
 const path = require('path');
 
 const Config = {
+    /* Path to the server */
+    serverPath: `http://localhost:3000`,
+
+    /* create web token */
     createWebToken: (id, email, nombre, apellido, role) => {
         return jwt.sign(
-            { id, email, nombre, apellido, role }, // Aquí incluimos todos los datos necesarios
+            { id, email, nombre, apellido, role },
             'secret webtoken user resonancia',
             {
-                expiresIn: 3 * 24 * 60 * 60 // 3 días
+                /* 3 dias */
+                expiresIn: 3 * 24 * 60 * 60
             }
         );
     },
 
+    /* configure multer */
     configMulter: () => {
         const storage = multer.diskStorage({
             destination: (req, file, cb) => {

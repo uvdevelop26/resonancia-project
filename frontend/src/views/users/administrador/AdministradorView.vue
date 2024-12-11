@@ -4,7 +4,6 @@ import Edit from "@/components/icons/Edit.vue";
 import Delete from "@/components/icons/Delete.vue";
 import FlashMessage from "@/components/FlashMessage.vue";
 import QuestionFlash from "@/components/QuestionFlash.vue";
-import SearchInput from "@/components/SearchInput.vue";
 import { ref, onMounted } from "vue";
 import { Utilities } from "@/js/Utilities";
 import { Constants } from "@/js/Contants";
@@ -130,7 +129,7 @@ onMounted(fetchUsers);
               @enter="enter"
               appear>
               <tr
-                class="h-14 text-center shadow group border-b-2"
+                class="h-14 text-center shadow group"
                 v-for="(user, index) in users"
                 :key="user.id"
                 :data-index="index">
