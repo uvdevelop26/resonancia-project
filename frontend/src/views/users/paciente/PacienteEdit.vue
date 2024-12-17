@@ -15,27 +15,29 @@ const ciudades = ref([]);
 const departamentos = ref([]);
 const message = ref("");
 const errors = ref({});
-const role = ref({});
+const rol = ref({});
 
 /* form edit */
 const form = ref({
   /* persona */
+  id: "",
   nombre: "",
   apellido: "",
-  slug: "",
   dni: "",
   telefono: "",
   fecha_nacimiento: "",
   sexo: "",
   direccion: "",
   edad: "",
-  ciudade_id: "",
+  ciudad_id: "",
   departamento_id: "",
   /* user */
   email: "",
   password: "",
-  role_id: "",
+  slug: "",
   profile_photo_path: "",
+  rol_id: "",
+  persona_id: "",
 });
 
 /* functions */
@@ -44,19 +46,12 @@ const close = () => {
   Utilities.close(message);
 };
 
-const getCurrentDptoId = (ciudades, ciudade_id) => {
-  const ciudad = ciudades.filter((ciudade) => ciudade.id === ciudade_id);
-  const departamentoId = ciudad[0].departamento_id;
-  return departamentoId;
-};
-
 const getSlug = () => {
   const slug = Utilities.slugify(form.value.nombre, form.value.apellido);
   form.value.slug = slug;
 };
 
 /* update user */
-
 const update = async () => {
   const { slug } = route.params;
 
@@ -69,27 +64,19 @@ const update = async () => {
     message.value = response.data.msg;
   } catch (error) {
     if (error.response) {
-      const errorObject = error.response.data.errors || [];
+      message.value = error.response.data.msg;
 
-      const newObjectError = {};
-
-      errorObject.forEach((err) => {
-        const path = err.path;
-
-        if (!newObjectError[path]) {
-          newObjectError[path] = [];
-        }
-
-        newObjectError[path].push(err);
-      });
-
-      errors.value = newObjectError;
+      if (error.response.data.errors) {
+        errors.value = Utilities.manageValidationErrors(
+          error.response.data.errors
+        );
+      }
+      console.error("Error en el Servidor:");
     }
   }
 };
 
 /* fetch data */
-
 const fetchData = async () => {
   const { slug } = route.params;
 
@@ -98,12 +85,36 @@ const fetchData = async () => {
       `http://localhost:3000/api/users/paciente/edit/${slug}`
     );
 
-    /* getting data */
+    const user = response.data.user;
+    rol.value = user.rol;
+
+    const formattedDateBday = Utilities.getFormattedDate(
+      user.persona.fecha_nacimiento
+    );
+
+    form.value = {
+      id: user.id,
+      /* persona */
+      nombre: user.persona.nombre,
+      apellido: user.persona.apellido,
+      dni: user.persona.dni,
+      telefono: user.persona.telefono,
+      fecha_nacimiento: formattedDateBday,
+      edad: user.persona.edad,
+      sexo: user.persona.sexo,
+      ciudad_id: user.persona.ciudad_id,
+      departamento_id: user.persona.ciudad.departamento_id,
+      direccion: user.persona.direccion,
+      /* user */
+      email: user.email,
+      password: "",
+      slug: user.slug,
+      profile_photo_path: user.profile_photo_path,
+      rol_id: user.rol.id,
+      persona_id: user.persona.id,
+    };
 
     const departamentosData = response.data.departamentos;
-    const persona = response.data.persona;
-    const user = response.data.user;
-    role.value = user.role;
 
     departamentosData.forEach((departamento) => {
       departamento.ciudades.forEach((ciudade) => {
@@ -115,37 +126,9 @@ const fetchData = async () => {
       delete departamento.ciudade;
       departamentos.value.push(departamento);
     });
-
-    /* filling form */
-    const departamentoId = getCurrentDptoId(
-      ciudades.value,
-      response.data.persona.ciudade_id
-    );
-
-    const formattedDateBday = Utilities.getFormattedDate(
-      persona.fecha_nacimiento
-    );
-
-    form.value = {
-      id: user.id,
-      nombre: persona.nombre,
-      apellido: persona.apellido,
-      slug: persona.slug,
-      dni: persona.dni,
-      telefono: persona.telefono,
-      fecha_nacimiento: formattedDateBday,
-      edad: persona.edad,
-      sexo: persona.sexo,
-      ciudade_id: persona.ciudade_id,
-      departamento_id: departamentoId,
-      direccion: persona.direccion,
-      email: user.email,
-      role_id: user.role_id,
-      password: "",
-    };
   } catch (error) {
     console.error("Error al cargar el usuario:", error);
-    message.value = error.response.data.message || "Error al crear el usuario";
+    message.value = error.response.data.message || "Error al editar el usuario";
   }
 };
 
@@ -193,7 +176,13 @@ onMounted(fetchData);
                 maxWidth="xs"
                 disabled="true"
               />
-              <TextInput label="DNI" type="text" id="dni" v-model="form.dni"  maxWidth="xs" />
+              <TextInput
+                label="DNI"
+                type="text"
+                id="dni"
+                v-model="form.dni"
+                maxWidth="xs"
+              />
               <TextInput
                 label="Teléfono"
                 type="text"
@@ -243,23 +232,23 @@ onMounted(fetchData);
                     v-for="departamento in departamentos"
                     :key="departamento.id"
                     :value="departamento.id">
-                    {{ departamento.departamento_nombre }}
+                    {{ departamento.nombre_departamento }}
                   </option>
                 </template>
               </SelectInput>
               <SelectInput
                 label="Ciudad"
-                id="ciudade_id"
+                id="ciudad_id"
                 maxWidth="xs"
-                :error="errors.ciudade_id"
-                v-model="form.ciudade_id">
+                :error="errors.ciudad_id"
+                v-model="form.ciudad_id">
                 <template #options>
                   <option :value="null"></option>
                   <option
                     v-for="ciudade in ciudades"
                     :key="ciudade.id"
                     :value="ciudade.id">
-                    {{ ciudade.ciudade_nombre }}
+                    {{ ciudade.nombre_ciudad }}
                   </option>
                 </template>
               </SelectInput>
@@ -290,13 +279,13 @@ onMounted(fetchData);
               />
               <SelectInput
                 label="Rol"
-                id="role_id"
+                id="rol_id"
                 maxWidth="xs"
-                :error="errors.role_id"
-                v-model="form.role_id"
+                :error="errors.rol_id"
+                v-model="form.rol_id"
                 disabled>
                 <template #options>
-                  <option :value="role.id">{{ role.role_nombre }}</option>
+                  <option :value="rol.id">{{ rol.nombre_rol }}</option>
                 </template>
               </SelectInput>
               <button

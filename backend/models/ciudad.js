@@ -3,25 +3,31 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class Departamento extends Model {
+  class Ciudad extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      Departamento.hasMany(models.Ciudad, {
+      Ciudad.belongsTo(models.Departamento, {
         foreignKey: 'departamento_id', // Nombre de la columna FK en la tabla ciudades
-        as: 'ciudades' // Alias para referenciar esta relación
+        as: 'departamento' // Alias para referenciar esta relación
+      });
+
+      Ciudad.hasMany(models.Persona, {
+        foreignKey: 'ciudad_id', // Nombre de la columna FK en la tabla ciudades
+        as: 'personas' // Alias para referenciar esta relación
       });
     }
   }
-  Departamento.init({
-    nombre_departamento: DataTypes.STRING
+  Ciudad.init({
+    nombre_ciudad: DataTypes.STRING,
+    departamento_id: DataTypes.INTEGER
   }, {
     sequelize,
-    modelName: 'Departamento',
+    modelName: 'Ciudad',
     timestamps: false,
   });
-  return Departamento;
+  return Ciudad;
 };

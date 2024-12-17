@@ -5,7 +5,7 @@ const path = require('path')
 const db = require('./models');
 const AuthRoutes = require('./routes/AuthRoutes');
 const UserRoutes = require('./routes/UserRoutes');
-const ExameneRoutes = require('./routes/ExameneRoutes')
+const ExamenRoutes = require('./routes/ExamenRoutes')
 const cookieParser = require('cookie-parser');
 
 const PORT = process.env.PORT || 3000;
@@ -18,6 +18,7 @@ const corsOptions = {
 };
 
 app.use('/storage', express.static(path.join(__dirname, 'storage')));
+//app.use('/data', express.static(path.join(__dirname, 'data')));
 
 app.use(cors(corsOptions));
 /* parse JSON to javascript object */
@@ -29,7 +30,7 @@ app.use('/api/auth', AuthRoutes);
 app.use('/api/users', UserRoutes);
 
 /* routes examene */
-app.use('/api/examenes', ExameneRoutes);
+app.use('/api/examenes', ExamenRoutes);
 
 db.sequelize.sync().then((req) => {
     app.listen(PORT, () => {

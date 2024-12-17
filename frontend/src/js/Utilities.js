@@ -62,9 +62,22 @@ const Utilities = {
             return substring;
         }
 
+    },
 
-    }
+    manageValidationErrors: (errorArray) => {
+        const newObject = {};
 
+        errorArray.forEach((err) => {
+            const path = err.path;
+
+            if (!newObject[path]) {
+                newObject[path] = [];
+            }
+            newObject[path].push(err);
+        });
+
+        return newObject;
+    },
 }
 
 export { Utilities }

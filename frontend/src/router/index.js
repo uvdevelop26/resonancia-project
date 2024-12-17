@@ -33,37 +33,37 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
-      path: '/users/administradores',
+      path: '/users/administrador',
       name: 'userAdmin',
       component: AdministradorView,
       meta: { requiresAuth: true }
     },
     {
-      path: '/users/pacientes',
+      path: '/users/paciente',
       name: 'userPaciente',
       component: PacienteView,
       meta: { requiresAuth: true }
     },
     {
-      path: '/users/administradores/create',
+      path: '/users/administrador/create',
       name: 'createUserAdmin',
       component: AdministradorCreate,
       meta: { requiresAuth: true },
     },
     {
-      path: '/users/administradores/edit/:slug',
+      path: '/users/administrador/edit/:slug',
       name: 'EditUserAdmin',
       component: AdministradorEdit,
       meta: { requiresAuth: true },
     },
     {
-      path: '/users/pacientes/create',
+      path: '/users/paciente/create',
       name: 'createUserPaciente',
       component: PacienteCreate,
       meta: { requiresAuth: true },
     },
     {
-      path: '/users/pacientes/edit/:slug',
+      path: '/users/paciente/edit/:slug',
       name: 'EditUserPaciente',
       component: PacienteEdit,
       meta: { requiresAuth: true },

@@ -1,4 +1,4 @@
-const { User, Persona, Role, Departamento, Ciudade } = require('../models');
+const { User, Persona, Rol, Departamento, Ciudad } = require('../models');
 const bcrypt = require('bcryptjs');
 
 const UserController = {
@@ -7,30 +7,26 @@ const UserController = {
         try {
             const { type } = req.params;
 
-            const role = await Role.findOne({ where: { role_nombre: type } });
-
-            if (!role) {
-                return res.status(400).json({ msg: "Rol no encontrado" });
-            }
+            const rol = await Rol.findOne({ where: { nombre_rol: type } });
 
             const users = await User.findAll({
-                where: { role_id: role.id },
+                where: { rol_id: rol.id },
                 include: [
                     {
                         model: Persona,
-                        as: 'personas',
+                        as: 'persona',
                         include: [
                             {
-                                model: Ciudade,
-                                as: 'ciudade'
-                            }
-                        ]
+                                model: Ciudad,
+                                as: 'ciudad',
+                            },
+                        ],
                     },
-                ]
+                ],
             });
 
-            if (!users) {
-                return res.status(404).json({ msg: "Usuarios no encontrados" });
+            if (!users || !rol) {
+                return res.status(404).json({ msg: "Datos No Encontrados" });
             }
 
             return res.status(200).json(users);
@@ -43,26 +39,26 @@ const UserController = {
     createUser: async (req, res) => {
         try {
 
+            /* encuentra rol */
             const { type } = req.params;
+            const rol = await Rol.findOne({ where: { nombre_rol: type } });
 
-            const role = await Role.findOne({ where: { role_nombre: type } });
-
-            if (!role) {
-                return res.status(400).json({ msg: "Rol no encontrado" });
-            }
-
+            /* encuentra departamentos y ciudades */
             const departamentos = await Departamento.findAll({
-                include: {
-                    model: Ciudade,
-                    as: 'ciudades'
-                },
+                include: [
+                    {
+                        model: Ciudad,
+                        as: 'ciudades',
+
+                    }
+                ]
             });
 
-            if (!role || !departamentos) {
-                return res.status(400).json({ msg: "Error en el servidor" });
+            if (!rol || !departamentos) {
+                return res.status(400).json({ msg: "Error al Buscar los datos" });
             }
 
-            return res.status(200).json({ role, departamentos });
+            return res.status(200).json({ rol, departamentos });
 
         } catch (error) {
             return res.status(500).json({ msg: "Error en el servidor" });
@@ -70,37 +66,33 @@ const UserController = {
     },
 
     storeUser: async (req, res) => {
-
         try {
 
-            const { nombre, apellido, slug, dni, telefono, fecha_nacimiento, sexo, direccion, edad, ciudade_id, email, password, profile_photo_path, role_id } = req.body;
+            const { nombre, apellido, slug, dni, telefono, fecha_nacimiento, sexo, direccion, edad, ciudad_id, email, password, profile_photo_path, rol_id } = req.body;
 
-            /* encrypt password */
+            /* encrypting password */
             const salt = bcrypt.genSaltSync(10);
             const hashedPassword = bcrypt.hashSync(password, salt);
 
-            /* create user */
-            const user = await User.create({
-                email,
-                password: hashedPassword,
-                profile_photo_path,
-                role_id
-            });
-
-            /* create Persona */
-
-            await Persona.create({
+            const persona = await Persona.create({
                 nombre,
                 apellido,
-                slug,
                 dni,
                 telefono,
                 fecha_nacimiento,
                 sexo,
                 direccion,
                 edad,
-                user_id: user.id,
-                ciudade_id
+                ciudad_id
+            });
+
+            await User.create({
+                email,
+                password: hashedPassword,
+                slug,
+                profile_photo_path,
+                rol_id,
+                persona_id: persona.id
             });
 
             res.status(200).json({ msg: "Usuario creado exitosamente" });
@@ -115,32 +107,43 @@ const UserController = {
     editUser: async (req, res) => {
         try {
 
-            /* find user and persona */
             const { slug } = req.params;
 
-            const persona = await Persona.findOne({ where: { slug: slug } });
-
             const user = await User.findOne({
-                where: { id: persona.user_id },
-                include: {
-                    model: Role,
-                    as: 'role'
-                }
+                where: { slug: slug },
+                include: [
+                    {
+                        model: Persona,
+                        as: 'persona',
+                        include: [
+                            {
+                                model: Ciudad,
+                                as: 'ciudad'
+                            }
+                        ]
+                    },
+                    {
+                        model: Rol,
+                        as: 'rol'
+                    }
+                ]
             });
 
-            /* finding data */
             const departamentos = await Departamento.findAll({
-                include: {
-                    model: Ciudade,
-                    as: 'ciudades'
-                },
+                include: [
+                    {
+                        model: Ciudad,
+                        as: 'ciudades',
+
+                    }
+                ]
             });
 
-            if (!departamentos || !persona || !user) {
-                return res.status(400).json({ msg: "Error en el servidor" });
+            if (!departamentos || !user) {
+                return res.status(400).json({ msg: "Datos no Encontrados" });
             }
 
-            return res.status(200).json({ user, persona, departamentos });
+            return res.status(200).json({ user, departamentos });
 
         } catch (error) {
             return res.status(500).json({ msg: "Error en el servidor" });
@@ -151,7 +154,7 @@ const UserController = {
         try {
             const { slug: slugParam } = req.params;
 
-            const { nombre, apellido, slug, dni, telefono, fecha_nacimiento, sexo, direccion, edad, ciudade_id, email, password, profile_photo_path, role_id } = req.body;
+            const { nombre, apellido, slug, dni, telefono, fecha_nacimiento, sexo, direccion, edad, ciudad_id, email, password, profile_photo_path, rol_id, persona_id } = req.body;
 
             let hashedPassword = null;
 
@@ -160,36 +163,32 @@ const UserController = {
                 hashedPassword = bcrypt.hashSync(password, salt);
             }
 
-            /* finding models */
-            const persona = await Persona.findOne({ where: { slug: slugParam } });
-
-            const userId = persona.user_id;
-
-            const user = await User.findOne({ where: { id: userId } });
+            const user = await User.findOne({ where: { slug: slugParam } });
+            const persona = await Persona.findOne({ where: { id: persona_id } });
 
             if (!user || !persona) {
-                return res.status(404).json({ msg: "Usuario no encontrado" });
+                return res.status(404).json({ msg: "Error al encontrar los Datos" });
             }
 
-            /* updating */
             await user.update({
                 email,
                 password: password ? hashedPassword : user.password,
+                slug,
                 profile_photo_path,
-                role_id
+                rol_id,
+                persona_id
             });
 
             await persona.update({
                 nombre,
                 apellido,
-                slug,
                 dni,
                 telefono,
                 fecha_nacimiento,
                 sexo,
                 direccion,
                 edad,
-                ciudade_id,
+                ciudad_id,
             });
 
             res.status(200).json({ msg: "Usuario actualizado exitosamente" });
@@ -205,16 +204,9 @@ const UserController = {
         try {
             const { slug } = req.params;
 
-            /* find models */
+            const user = await User.findOne({ where: { slug: slug } });
 
-            const persona = await Persona.findOne({ where: { slug: slug } });
-            const userId = persona.user_id;
-            const user = await User.findOne({ where: { id: userId } });
-
-            /* deleting */
-            await persona.destroy();
             await user.destroy();
-
 
             res.status(200).json({ msg: "Usuario eliminado exitosamente" });
 

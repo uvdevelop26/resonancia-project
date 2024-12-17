@@ -34,17 +34,6 @@ const enter = (el, done) => {
   });
 };
 
-const fetchUsers = async () => {
-  try {
-    const response = await axios.get(
-      `${Constants.serverPath}/api/users/administrador`
-    );
-    users.value = response.data;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
 const deleteUser = async (slug) => {
   try {
     const response = await axios.delete(
@@ -58,9 +47,21 @@ const deleteUser = async (slug) => {
     }, 300);
 
     /* Filtra el usuario eliminado de la lista de usuarios */
-    users.value = users.value.filter((user) => user.personas[0].slug !== slug);
+    users.value = users.value.filter((user) => user.slug !== slug);
   } catch (error) {
     console.error("Error al eliminar el usuario:", error);
+  }
+};
+
+const fetchUsers = async () => {
+  try {
+    const response = await axios.get(
+      `${Constants.serverPath}/api/users/administrador`
+    );
+    users.value = response.data;
+
+  } catch (error) {
+    console.error(error);
   }
 };
 
@@ -83,7 +84,7 @@ onMounted(fetchUsers);
           class="w-full flex justify-between gap-2 items-center mt-4 md:gap-8">
           <!--    <SearchInput v-model="search" /> -->
           <router-link
-            to="/users/administradores/create"
+            to="/users/administrador/create"
             class="w-28 h-8 text-white font-bold bg-primary flex items-center justify-center rounded-lg shadow-lg hover:bg-primary-light hover:text-primary hover:border">
             Crear
           </router-link>
@@ -111,6 +112,10 @@ onMounted(fetchUsers);
                 </th>
                 <th
                   class="py-3 px-4 text-gray-500 text-xs md:text-sm font-bold">
+                  Ciudad
+                </th>
+                <th
+                  class="py-3 px-4 text-gray-500 text-xs md:text-sm font-bold">
                   Dirección
                 </th>
                 <th
@@ -128,59 +133,76 @@ onMounted(fetchUsers);
               @before-enter="beforeEnter"
               @enter="enter"
               appear>
-              <tr
-                class="h-14 text-center shadow group"
-                v-for="(user, index) in users"
-                :key="user.id"
-                :data-index="index">
-                <td
-                  class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100">
-                  {{ index + 1 }}
-                </td>
-                <td
-                  class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100">
-                  {{ user.personas[0].nombre }}
-                </td>
-                <td
-                  class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100">
-                  {{ user.personas[0].apellido }}
-                </td>
-                <td
-                  class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100">
-                  {{ user.personas[0].dni }}
-                </td>
-                <td
-                  class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100">
-                  {{ user.personas[0].ciudade.ciudade_nombre }}
-                </td>
-                <td
-                  class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100">
-                  {{ user.email }}
-                </td>
-                <td
-                  class="py-1 px-1 text-sm md:text-xs bg-white group-hover:bg-gray-100">
-                  <div
-                    class="w-full h-full flex items-center justify-center gap-2">
-                    <router-link
-                      :to="`/users/administradores/edit/${user.personas[0].slug}`"
-                      class="inline-block border bg-primary-light px-3 py-3 rounded-full bg-light-green-two hover:shadow-md">
-                      <Edit class="w-3 h-3 fill-primary" />
-                    </router-link>
-                    <button
-                      @click="questionFlashIndex = index"
-                      class="inline-block border bg-primary-light px-3 py-3 rounded-full bg-light-green-two hover:shadow-md">
-                      <Delete class="w-3 h-3 fill-primary" />
-                    </button>
-                  </div>
-                </td>
-                <QuestionFlash
-                  :show="questionFlashIndex === index"
-                  title="¿Desea eliminar este usuario?"
-                  :data="`Eliminar a ${user.personas[0].nombre} ${user.personas[0].apellido}`"
-                  @continues="deleteUser(user.personas[0].slug)"
-                  @close="questionFlashIndex = null"
-                />
-              </tr>
+              <!-- si no existen usurarios cargados -->
+              <template v-if="users.length === 0">
+                <tr>
+                  <td
+                    colspan="8"
+                    class="px-6 py-4 text-center text-sm text-gray-500">
+                    NO SE HAN REGISTRADO USUARIOS DE ESTA CATEGORÍA.
+                  </td>
+                </tr>
+              </template>
+              <!-- Si existen hay -->
+              <template v-else>
+                <tr
+                  class="h-14 text-center shadow group"
+                  v-for="(user, index) in users"
+                  :key="user.id"
+                  :data-index="index">
+                  <td
+                    class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100">
+                    {{ index + 1 }}
+                  </td>
+                  <td
+                    class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100">
+                    {{ user.persona.nombre }}
+                  </td>
+                  <td
+                    class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100">
+                    {{ user.persona.apellido }}
+                  </td>
+                  <td
+                    class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100">
+                    {{ user.persona.dni }}
+                  </td>
+                  <td
+                    class="py-1 px-1 text-xs capitalize md:text-sm bg-white group-hover:bg-gray-100">
+                    {{ user.persona.ciudad.nombre_ciudad }}
+                  </td>
+                  <td
+                    class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100">
+                    {{ user.persona.direccion }}
+                  </td>
+                  <td
+                    class="py-1 px-1 text-xs md:text-sm bg-white group-hover:bg-gray-100">
+                    {{ user.email }}
+                  </td>
+                  <td
+                    class="py-1 px-1 text-sm md:text-xs bg-white group-hover:bg-gray-100">
+                    <div
+                      class="w-full h-full flex items-center justify-center gap-2">
+                      <router-link
+                        :to="`/users/administrador/edit/${user.slug}`"
+                        class="inline-block border bg-primary-light px-3 py-3 rounded-full bg-light-green-two hover:shadow-md">
+                        <Edit class="w-3 h-3 fill-primary" />
+                      </router-link>
+                      <button
+                        @click="questionFlashIndex = index"
+                        class="inline-block border bg-primary-light px-3 py-3 rounded-full bg-light-green-two hover:shadow-md">
+                        <Delete class="w-3 h-3 fill-primary" />
+                      </button>
+                    </div>
+                  </td>
+                  <QuestionFlash
+                    :show="questionFlashIndex === index"
+                    title="¿Desea eliminar este usuario?"
+                    :data="`Eliminar a ${user.persona.nombre} de la Lista`"
+                    @continues="deleteUser(user.slug)"
+                    @close="questionFlashIndex = null"
+                  />
+                </tr>
+              </template>
             </transition-group>
           </table>
         </div>

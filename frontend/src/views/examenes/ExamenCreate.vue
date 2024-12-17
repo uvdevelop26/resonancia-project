@@ -17,7 +17,7 @@ const handlePreview = ref(false);
 const message = ref("");
 
 const form = ref({
-  fecha_examene: "",
+  fecha: "",
   resultado: "",
   user_id: "",
   url: [],
@@ -41,7 +41,7 @@ const action = () => {
   form.value.user_id = "";
 
   const user = pacientes.value.filter(
-    (paciente) => paciente.personas[0].dni === dni
+    (paciente) => paciente.persona.dni === dni
   );
 
   form.value.user_id = user[0].id;
@@ -57,7 +57,7 @@ watchEffect(() => {
 const store = async () => {
   const formData = new FormData();
 
-  formData.append("fecha_examene", form.value.fecha_examene);
+  formData.append("fecha", form.value.fecha);
   formData.append("resultado", form.value.resultado);
   formData.append("user_id", form.value.user_id);
 
@@ -83,22 +83,16 @@ const store = async () => {
     errors.value = {};
   } catch (error) {
     if (error.response) {
-      const errorObject = error.response.data.errors || [];
+      message.value = error.response.data.msg;
 
-      const newObjectError = {};
+      if (error.response.data.errors) {
+        errors.value = Utilities.manageValidationErrors(
+          error.response.data.errors
+        );
+      }
 
-      errorObject.forEach((err) => {
-        const path = err.path;
-
-        if (!newObjectError[path]) {
-          newObjectError[path] = [];
-        }
-
-        newObjectError[path].push(err);
-      });
-
-      errors.value = newObjectError;
-    }
+      console.error("Error en el login:");
+    } 
   }
 };
 
@@ -109,6 +103,8 @@ const fetchData = async () => {
     );
 
     pacientes.value = response.data;
+
+    console.log(pacientes.value)
   } catch (error) {
     console.error("Error en el servidor", error);
   }
@@ -132,14 +128,15 @@ onMounted(fetchData);
         <div class="w-full rounded-lg bg-white shadow-md p-4 lg:p-6 mt-4">
           <form @submit.prevent="store" class="flex flex-col gap-4">
             <div
-              class="flex flex-col gap-4 w-full items-center md:flex-row md:items-start md:flex-wrap">
+              class="flex flex-col gap-4 w-full items-center md:flex-row md:items-start md:flex-wrap"
+            >
               <TextInput
                 label="Fecha"
                 type="date"
-                id="fecha_examen"
-                v-model="form.fecha_examene"
-                :error="errors.fecha_examene"
-                maxWidth="xs"
+                id="fecha"
+                v-model="form.fecha"
+                :error="errors.fecha"
+                maxWidth="sm"
               />
               <SearchInput
                 placeholder="Ingresa nombre, apellido o CI. Selecciona en la lista"
@@ -150,7 +147,7 @@ onMounted(fetchData);
                 :criteria="['nombre', 'apellido', 'dni']"
                 :error="errors.user_id"
                 @action="action"
-                maxWidth="xs"
+                maxWidth="sm"
               />
               <FileInput
                 label="Selecciona Archivo"
@@ -158,7 +155,7 @@ onMounted(fetchData);
                 accept=".jpeg, .jpg, .png"
                 multiple="true"
                 placeholder=".jpeg, .jpg, .png"
-                maxWidth="xs"
+                maxWidth="sm"
                 v-model="form.url"
                 :error="errors.url"
                 :clean-preview="handlePreview"
@@ -166,7 +163,7 @@ onMounted(fetchData);
               <TextArea
                 label="Resultados"
                 id="resultado"
-                maxWidth="xs"
+                maxWidth="sm"
                 v-model="form.resultado"
                 :error="errors.resultado"
                 placeholder="Los resultados se generarán en segundos.."
@@ -175,7 +172,8 @@ onMounted(fetchData);
             <div class="flex flex-col gap-4 w-full items-center md:flex-row">
               <button
                 type="submit"
-                class="h-10 w-72 bg-primary self-center text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8">
+                class="h-10 w-72 bg-primary self-center text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8"
+              >
                 Guardar
               </button>
             </div>

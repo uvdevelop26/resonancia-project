@@ -1,51 +1,56 @@
+'use strict';
+const {
+  Model
+} = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
+  class User extends Model {
 
-  const User = sequelize.define("User", {
+    static associate(models) {
+      User.belongsTo(models.Rol, {
+        foreignKey: 'rol_id',
+        as: 'rol'
+      });
+
+      User.belongsTo(models.Persona, {
+        foreignKey: 'persona_id',
+        as: 'persona'
+      });
+
+      User.hasMany(models.Examen, {
+        foreignKey: 'user_id',
+        as: 'examenes'
+      });
+    }
+  }
+  User.init({
     email: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true,
-      validate: {
-        notEmpty: true
-      }
     },
     password: {
       type: DataTypes.STRING,
       allowNull: false,
-      validate: {
-        notEmpty: true
-      }
     },
-
+    slug: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true
+    },
     profile_photo_path: {
       type: DataTypes.TEXT,
-      allowNull: true,
     },
-
-    role_id: {
+    rol_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      validate: {
-        notEmpty: true
-      }
-
-    }
+      allowNull: false
+    },
+    persona_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+  }, {
+    sequelize,
+    modelName: 'User',
   });
-
-
-  User.associate = (models) => {
-
-    User.belongsTo(models.Role, {
-      foreignKey: 'role_id',
-      as: 'role'
-    });
-
-    User.hasMany(models.Persona, {
-      foreignKey: 'user_id',
-      as: 'personas'
-    });
-
-  }
-
   return User;
-}
+};

@@ -68,6 +68,10 @@ watchEffect(() => {
   const criteria = props.criteria;
   const data = props.data;
 
+  criteria.forEach((crit) => {});
+
+  /* 
+
   criteria.forEach((crit) => {
     data.forEach((dat) => {
       for (let key in dat) {
@@ -94,7 +98,7 @@ watchEffect(() => {
         }
       }
     });
-  });
+  }); */
 });
 
 const errorClasess = computed(() => {
@@ -119,7 +123,8 @@ const emit = defineEmits(["update:modelValue", "action"]);
     <label v-if="label" :for="id" class="font-bold">{{ label }}:</label>
     <div
       class="w-full h-10 overflow-hidden relative border-b"
-      :class="errorClasess">
+      :class="errorClasess"
+    >
       <Search
         class="w-5 h-5 absolute top-1/2 -translate-y-1/2 left-2 fill-gray-400"
       />
@@ -138,15 +143,18 @@ const emit = defineEmits(["update:modelValue", "action"]);
     <!-- list -->
     <ul
       v-if="showOnList.length > 0 && showList"
-      class="absolute z-50 w-full py-2 border-2 bg-white shadow top-[4.655rem] max-h-52 overflow-y-auto">
+      class="absolute z-50 w-full py-2 border-2 bg-white shadow top-[4.655rem] max-h-52 overflow-y-auto"
+    >
       <li
         v-for="data in showOnList"
         :key="data.id"
-        class="text-sm p-2 text-gray-500 hover:bg-gray-200">
+        class="text-sm p-2 text-gray-500 hover:bg-gray-200"
+      >
         <button
           type="button"
           class="w-full h-full text-start"
-          @click="select(data)">
+          @click="select(data)"
+        >
           {{ generateShowText(data) }}
         </button>
       </li>

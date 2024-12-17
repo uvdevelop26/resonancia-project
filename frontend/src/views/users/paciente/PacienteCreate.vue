@@ -19,16 +19,21 @@ const form = ref({
   sexo: "",
   direccion: "",
   edad: "",
-  ciudade_id: "",
+  ciudad_id: "",
   departamento_id: "",
   /* user */
   email: "",
   password: "",
   profile_photo_path: "",
-  role_id: "",
+  rol_id: "",
 });
 
 const errors = ref({});
+const departamentos = ref([]);
+const ciudades = ref([]);
+const rol = ref("");
+const message = ref("");
+
 
 /* functios */
 const cleanForm = () => {
@@ -44,12 +49,6 @@ const close = () => {
   Utilities.close(message);
 };
 
-/* to show in the select input */
-const departamentos = ref([]);
-const ciudades = ref([]);
-const role = ref("");
-
-const message = ref("");
 
 /* create new user */
 const store = async () => {
@@ -66,21 +65,15 @@ const store = async () => {
     errors.value = {};
   } catch (error) {
     if (error.response) {
-      const errorObject = error.response.data.errors || [];
+      message.value = error.response.data.msg;
 
-      const newObjectError = {};
+      if (error.response.data.errors) {
+        errors.value = Utilities.manageValidationErrors(
+          error.response.data.errors
+        );
+      }
 
-      errorObject.forEach((err) => {
-        const path = err.path;
-
-        if (!newObjectError[path]) {
-          newObjectError[path] = [];
-        }
-
-        newObjectError[path].push(err);
-      });
-
-      errors.value = newObjectError;
+      console.error("Error en el login:");
     }
   }
 };
@@ -92,9 +85,9 @@ const fechData = async () => {
       "http://localhost:3000/api/users/paciente/create"
     );
 
-    role.value = response.data.role;
+    rol.value = response.data.rol;
 
-    form.value.role_id = role.value.id;
+    form.value.rol_id = rol.value.id;
 
     const departamentosData = response.data.departamentos;
 
@@ -116,7 +109,7 @@ const fechData = async () => {
 onMounted(fechData);
 </script>
 <template>
-  <AppLayout :title="`Crear Paciente`">
+  <AppLayout title="Crear Paciente">
     <template #content>
       <div class="w-full h-full overflow-y-auto flex flex-col gap-5 relative">
         <!-- flash message -->
@@ -131,11 +124,12 @@ onMounted(fechData);
         <div class="w-full rounded-lg bg-white shadow-md p-4 lg:p-6 mt-4">
           <form @submit.prevent="store" class="flex flex-col gap-4">
             <div
-              class="flex flex-col gap-4 w-full items-center md:flex-row md:flex-wrap">
+              class="flex flex-col gap-4 w-full items-center justify-center md:flex-row md:justify-start md:flex-wrap">
               <TextInput
                 label="Nombre"
                 type="text"
                 id="nombre"
+                maxWidth="sm"
                 :error="errors.nombre"
                 v-model="form.nombre"
                 @input="getSlug()"
@@ -143,7 +137,8 @@ onMounted(fechData);
               <TextInput
                 label="Apellidos"
                 type="text"
-                id="apellidos"
+                id="apellido"
+                maxWidth="sm"
                 :error="errors.apellido"
                 v-model="form.apellido"
                 @input="getSlug()"
@@ -152,6 +147,7 @@ onMounted(fechData);
                 label="Slug"
                 type="text"
                 id="slug"
+                maxWidth="sm"
                 :error="errors.slug"
                 v-model="form.slug"
                 disabled="true"
@@ -160,6 +156,7 @@ onMounted(fechData);
                 label="DNI"
                 type="text"
                 id="dni"
+                maxWidth="sm"
                 :error="errors.dni"
                 v-model="form.dni"
               />
@@ -167,6 +164,7 @@ onMounted(fechData);
                 label="Teléfono"
                 type="text"
                 id="telefono"
+                maxWidth="sm"
                 :error="errors.telefono"
                 v-model="form.telefono"
               />
@@ -174,6 +172,7 @@ onMounted(fechData);
                 label="Fecha de Nacimiento"
                 type="date"
                 id="fecha_nacimiento"
+                maxWidth="sm"
                 :error="errors.fecha_nacimiento"
                 v-model="form.fecha_nacimiento"
               />
@@ -183,12 +182,14 @@ onMounted(fechData);
                 id="edad"
                 min="1"
                 max="100"
+                maxWidth="sm"
                 :error="errors.edad"
                 v-model="form.edad"
               />
               <SelectInput
                 label="Sexo"
                 id="sexo"
+                maxWidth="sm"
                 :error="errors.sexo"
                 v-model="form.sexo">
                 <template #options>
@@ -200,6 +201,7 @@ onMounted(fechData);
               <SelectInput
                 label="Departamento"
                 id="departamento_id"
+                maxWidth="sm"
                 v-model="form.departamento_id">
                 <template #options>
                   <option :value="null"></option>
@@ -207,22 +209,23 @@ onMounted(fechData);
                     v-for="departamento in departamentos"
                     :key="departamento.id"
                     :value="departamento.id">
-                    {{ departamento.departamento_nombre }}
+                    {{ departamento.nombre_departamento }}
                   </option>
                 </template>
               </SelectInput>
               <SelectInput
                 label="Ciudad"
-                id="ciudade_id"
-                :error="errors.ciudade_id"
-                v-model="form.ciudade_id">
+                id="ciudad_id"
+                maxWidth="sm"
+                :error="errors.ciudad_id"
+                v-model="form.ciudad_id">
                 <template #options>
                   <option :value="null"></option>
                   <option
                     v-for="ciudade in ciudades"
                     :key="ciudade.id"
                     :value="ciudade.id">
-                    {{ ciudade.ciudade_nombre }}
+                    {{ ciudade.nombre_ciudad }}
                   </option>
                 </template>
               </SelectInput>
@@ -230,6 +233,7 @@ onMounted(fechData);
                 label="Dirección"
                 type="text"
                 id="direccion"
+                maxWidth="sm"
                 :error="errors.direccion"
                 v-model="form.direccion"
               />
@@ -237,6 +241,7 @@ onMounted(fechData);
                 label="Correo"
                 type="email"
                 id="email"
+                maxWidth="sm"
                 :error="errors.email"
                 v-model="form.email"
               />
@@ -244,17 +249,19 @@ onMounted(fechData);
                 label="Contraseña"
                 type="password"
                 id="password"
+                maxWidth="sm"
                 :error="errors.password"
                 v-model="form.password"
               />
               <SelectInput
                 label="Rol"
-                id="role_id"
-                :error="errors.role_id"
-                v-model="form.role_id"
+                id="rol_id"
+                maxWidth="sm"
+                :error="errors.rol_id"
+                v-model="form.rol_id"
                 disabled>
                 <template #options>
-                  <option :value="role.id">{{ role.role_nombre }}</option>
+                  <option :value="rol.id">{{ rol.nombre_rol }}</option>
                 </template>
               </SelectInput>
               <button

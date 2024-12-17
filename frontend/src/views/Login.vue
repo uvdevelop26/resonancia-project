@@ -28,15 +28,15 @@ const login = async () => {
   try {
     const response = await axios.post(
       `${Constants.serverPath}/api/auth/login`,
-      form.value,
-      { withCredentials: true }
+      form.value
+      /*  { withCredentials: true } */
     );
 
-    localStorage.setItem("jwt", response.data.token);
+    /*  localStorage.setItem("jwt", response.data.token);
 
     axios.defaults.headers.common[
       "Authorization"
-    ] = `Bearer ${response.data.token}`;
+    ] = `Bearer ${response.data.token}`; */
 
     message.value = response.data.msg;
 
@@ -45,23 +45,14 @@ const login = async () => {
     if (error.response) {
       message.value = error.response.data.msg;
 
-      const errorObject = error.response.data.errors || [];
+      if (error.response.data.errors) {
+        errors.value = Utilities.manageValidationErrors(
+          error.response.data.errors
+        );
+      }
 
-      const newErrorObject = {};
-
-      errorObject.forEach((err) => {
-        const path = err.path;
-
-        if (!newErrorObject[path]) {
-          newErrorObject[path] = [];
-        }
-        newErrorObject[path].push(err);
-      });
-
-      errors.value = newErrorObject;
+      console.error("Error en el login:");
     }
-
-    console.error("Error en el login:");
   }
 };
 </script>
@@ -77,18 +68,20 @@ const login = async () => {
       @close="close"
     />
     <div
-      class="w-full flex flex-col md:flex-row md:w-auto md:rounded-2xl overflow-hidden md:shadow-2xl">
+      class="w-full flex flex-col md:flex-row md:w-[598px] md:rounded-2xl overflow-hidden md:shadow-2xl">
+      <!-- logo -->
       <div
-        class="h-52 md:h-auto flex items-center justify-center md:w-72 md:flex-1 md:bg-primary-light">
+        class="h-52 md:h-auto flex items-center justify-center md:bg-primary-light md:flex-1">
         <div
           class="p-3 bg-white rounded-tl-xl rounded-bl-xl rounded-br-xl md:bg-primary">
           <Logo class="w-12 h-12 fill-primary md:fill-white" />
         </div>
       </div>
+      <!-- formulario -->
       <div
-        class="bg-white h-[25rem] pt-8 px-4 rounded-tl-[6rem] flex flex-col items-center md:rounded-tl-none md:flex-1 md:px-6">
+        class="bg-white h-[25rem] px-4 rounded-tl-[6rem] flex flex-col justify-center items-center md:rounded-tl-none md:flex-1">
         <h1 class="text-2xl font-bold text-primary italic">Login</h1>
-        <form @submit.prevent="login" class="flex flex-col pt-4">
+        <form @submit.prevent="login" class="flex flex-col w-full px-4">
           <TextInput
             label="Email"
             type="email"

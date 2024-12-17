@@ -3,8 +3,8 @@ const { check } = require('express-validator');
 const ExameneValidator = {
     store: [
         /* fecha de examene */
-        check('fecha_examene', 'El campo fecha es obligatorio').notEmpty(),
-        check('fecha_examene', 'Inserta una fecha válida').isDate(),
+        check('fecha', 'El campo fecha es obligatorio').notEmpty(),
+        check('fecha', 'Inserta una fecha válida').isDate(),
 
         /* paciente */
         check('user_id', 'El campo paciente es obligatorio').notEmpty(),

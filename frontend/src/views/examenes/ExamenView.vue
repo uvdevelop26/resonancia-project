@@ -17,54 +17,55 @@ const user = ref(null);
 const message = ref("");
 const showDeleteSuccess = ref(false);
 
-
 const close = () => {
   Utilities.close(message);
   showDeleteSuccess.value = false;
 };
 
 const beforeEnter = (el) => {
-  el.style.transform = "translateY(60px)"; 
+  el.style.transform = "translateY(60px)";
   el.style.opacity = 0;
 };
 
 const enter = (el, done) => {
   gsap.to(el, {
     duration: 0.6,
-    y: 0, 
+    y: 0,
     opacity: 1,
     onComplete: done,
     delay: el.dataset.index * 0.1,
-    ease: "power3.out"
+    ease: "power3.out",
   });
 };
 
 const fetchData = async () => {
   try {
-    const userResponse = await axios.get(
+    /* const userResponse = await axios.get(
       `${Constants.serverPath}/api/auth/userinfo`
-    );
+    ); */
 
     const examenesResponse = await axios.get(
       `${Constants.serverPath}/api/examenes/`
     );
 
-    user.value = userResponse.data.user;
+    examenes.value = examenesResponse.data;
 
-    if(route.query.message !== ""){
+    // user.value = userResponse.data.user;
+
+    /*  if(route.query.message !== ""){
       message.value = route.query.message;
       showDeleteSuccess.value = true;
 
       router.replace({ query: { ...route.query, message: undefined } });
-    }
-
+    } */
+    /* 
     if (user.value.role_id === 2) {
       examenes.value = examenesResponse.data.filter(
         (examene) => examene.user.id === user.value.id
       );
     } else {
       examenes.value = examenesResponse.data;
-    }
+    } */
   } catch (error) {
     console.error("Error al obtener los datos", error);
   }
@@ -94,8 +95,15 @@ onMounted(fetchData);
             Nuevo
           </router-link>
         </div>
+        <div
+          v-if="examenes.length === 0"
+          class="px-6 py-4 text-center text-sm text-gray-500">
+          Todavía No Hay Exámenes para Mostrar
+        </div>
+
         <!-- cards -->
         <transition-group
+          v-else
           tag="div"
           class="flex flex-col gap-2 md:flex-row md:flex-wrap md:gap-6"
           appear
@@ -122,14 +130,8 @@ onMounted(fetchData);
                   class="text-sm h-24 w-full flex flex-col justify-center relative">
                   <h1
                     class="flex justify-between items-center font-bold text-primary text-sm underline">
-                    {{
-                      examene.user.personas?.[0]?.nombre ||
-                      "Nombre no disponible"
-                    }}
-                    {{
-                      examene.user.personas?.[0]?.apellido ||
-                      "Apellido no disponible"
-                    }}
+                    {{ examene.user.persona.nombre }}
+                    {{ examene.user.persona.apellido }}
                     <User class="w-3 h-3 fill-primary" />
                   </h1>
                   <p>{{ Utilities.shortingString(examene.resultado) }}</p>

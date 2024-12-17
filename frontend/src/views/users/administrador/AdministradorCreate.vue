@@ -19,15 +19,19 @@ const form = ref({
   sexo: "",
   direccion: "",
   edad: "",
-  ciudade_id: "",
+  ciudad_id: "",
   departamento_id: "",
   /* user */
   email: "",
   password: "",
   profile_photo_path: "",
-  role_id: "",
+  rol_id: "",
 });
 
+const departamentos = ref([]);
+const ciudades = ref([]);
+const rol = ref("");
+const message = ref("");
 const errors = ref({});
 
 /* functios */
@@ -44,13 +48,6 @@ const close = () => {
   Utilities.close(message);
 };
 
-/* to show in the select input */
-const departamentos = ref([]);
-const ciudades = ref([]);
-const role = ref("");
-
-const message = ref("");
-
 /* create new user */
 const store = async () => {
   try {
@@ -66,21 +63,15 @@ const store = async () => {
     errors.value = {};
   } catch (error) {
     if (error.response) {
-      const errorObject = error.response.data.errors || [];
+      message.value = error.response.data.msg;
 
-      const newObjectError = {};
+      if (error.response.data.errors) {
+        errors.value = Utilities.manageValidationErrors(
+          error.response.data.errors
+        );
+      }
 
-      errorObject.forEach((err) => {
-        const path = err.path;
-
-        if (!newObjectError[path]) {
-          newObjectError[path] = [];
-        }
-
-        newObjectError[path].push(err);
-      });
-
-      errors.value = newObjectError;
+      console.error("Error en el Servidor:");
     }
   }
 };
@@ -92,9 +83,9 @@ const fechData = async () => {
       "http://localhost:3000/api/users/administrador/create"
     );
 
-    role.value = response.data.role;
+    rol.value = response.data.rol;
 
-    form.value.role_id = role.value.id;
+    form.value.rol_id = rol.value.id;
 
     const departamentosData = response.data.departamentos;
 
@@ -154,7 +145,7 @@ onMounted(fechData);
                 label="Slug"
                 type="text"
                 id="slug"
-                 maxWidth="xs"
+                maxWidth="xs"
                 :error="errors.slug"
                 v-model="form.slug"
                 disabled="true"
@@ -216,23 +207,23 @@ onMounted(fechData);
                     v-for="departamento in departamentos"
                     :key="departamento.id"
                     :value="departamento.id">
-                    {{ departamento.departamento_nombre }}
+                    {{ departamento.nombre_departamento }}
                   </option>
                 </template>
               </SelectInput>
               <SelectInput
                 label="Ciudad"
-                id="ciudade_id"
+                id="ciudad_id"
                 maxWidth="xs"
-                :error="errors.ciudade_id"
-                v-model="form.ciudade_id">
+                :error="errors.ciudad_id"
+                v-model="form.ciudad_id">
                 <template #options>
                   <option :value="null"></option>
                   <option
                     v-for="ciudade in ciudades"
                     :key="ciudade.id"
                     :value="ciudade.id">
-                    {{ ciudade.ciudade_nombre }}
+                    {{ ciudade.nombre_ciudad }}
                   </option>
                 </template>
               </SelectInput>
@@ -262,13 +253,13 @@ onMounted(fechData);
               />
               <SelectInput
                 label="Rol"
-                id="role_id"
+                id="rol_id"
                 maxWidth="xs"
-                :error="errors.role_id"
-                v-model="form.role_id"
+                :error="errors.rol_id"
+                v-model="form.rol_id"
                 disabled>
                 <template #options>
-                  <option :value="role.id">{{ role.role_nombre }}</option>
+                  <option :value="rol.id">{{ rol.nombre_rol }}</option>
                 </template>
               </SelectInput>
               <button

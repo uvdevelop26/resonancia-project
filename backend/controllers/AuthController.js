@@ -1,6 +1,5 @@
-const { User, Persona, Role } = require('../models');
+const { User, Persona, Rol } = require('../models');
 const bcrypt = require('bcryptjs');
-const Config = require('../config/Config');
 
 const AuthController = {
     login: async (req, res) => {
@@ -12,11 +11,11 @@ const AuthController = {
                 include: [
                     {
                         model: Persona,
-                        as: 'personas',
+                        as: 'persona',
                     },
                     {
-                        model: Role,
-                        as: 'role'
+                        model: Rol,
+                        as: 'rol'
                     }
                 ]
             });
@@ -31,14 +30,17 @@ const AuthController = {
                 return res.status(400).json({ msg: "Contraseña incorrecta" });
             }
 
-            // Crear el JWT
-            const token = Config.createWebToken(user.id, user.email, user.personas[0].nombre, user.personas[0].apellido, user.role_id);
+            /* // Crear el JWT
+            const token = Config.createWebToken(user.id, user.email, user.personas[0].nombre, user.personas[0].apellido, user.role_id); */
 
             // Enviar el token al cliente
-            return res.status(200).json({ token, user });
+            /* return res.status(200).json({ token, user }); */
+            return res.status(200).json({ user });
 
         } catch (error) {
+            console.log(error)
             return res.status(500).json({ msg: "Error en el servidor" });
+           
         }
     },
     getUserInfo: async (req, res) => {

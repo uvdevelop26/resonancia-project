@@ -1,111 +1,69 @@
+'use strict';
+const {
+  Model
+} = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
+  class Persona extends Model {
+    /**
+     * Helper method for defining associations.
+     * This method is not a part of Sequelize lifecycle.
+     * The `models/index` file will call this method automatically.
+     */
+    static associate(models) {
 
-    const Persona = sequelize.define("Persona", {
+      Persona.belongsTo(models.Ciudad, {
+        foreignKey: 'ciudad_id',
+        as: 'ciudad'
+      });
 
-        nombre: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                notEmpty: true
-            }
-        },
+      Persona.hasMany(models.User, {
+        foreignKey: 'persona_id',
+        as: 'users'
+      });
 
-        apellido: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                notEmpty: true
-            }
-        },
-        slug: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                notEmpty: true
-            }
-        },
-
-        dni: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true,
-            validate: {
-                notEmpty: true
-            }
-        },
-
-        telefono: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                notEmpty: true
-            }
-        },
-
-        fecha_nacimiento: {
-            type: DataTypes.DATE,
-            allowNull: false,
-            validate: {
-                notEmpty: true
-            }
-        },
-
-        sexo: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                notEmpty: true
-            }
-        },
-
-        direccion: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            validate: {
-                notEmpty: true
-            }
-        },
-
-        edad: {
-            type: DataTypes.TINYINT,
-            allowNull: false,
-            validate: {
-                notEmpty: true
-            }
-        },
-
-        user_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            validate: {
-                notEmpty: true
-            }
-        },
-
-        ciudade_id: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-            validate: {
-                notEmpty: true
-            }
-        }
-
-    });
-
-
-    Persona.associate = (models) => {
-        Persona.belongsTo(models.User, {
-            foreignKey: 'user_id',
-            as: 'user'
-        });
-
-        Persona.belongsTo(models.Ciudade, {
-            foreignKey: 'ciudade_id',
-            as: 'ciudade'
-        });
     }
-
-
-    return Persona;
-
-}
+  }
+  Persona.init({
+    nombre: {
+      type: DataTypes.STRING(100),
+      allowNull: false
+    },
+    apellido: {
+      type: DataTypes.STRING(100),
+      allowNull: false
+    },
+    dni: {
+      type: DataTypes.STRING(30),
+      allowNull: false,
+      unique: true
+    },
+    telefono: {
+      type: DataTypes.STRING(20),
+      allowNull: false
+    },
+    fecha_nacimiento: {
+      type: DataTypes.DATE,
+      allowNull: false
+    },
+    sexo: {
+      type: DataTypes.STRING(20),
+      allowNull: false
+    },
+    direccion: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    edad: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    ciudad_id: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    }
+  }, {
+    sequelize,
+    modelName: 'Persona',
+  });
+  return Persona;
+};

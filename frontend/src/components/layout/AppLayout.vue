@@ -13,9 +13,9 @@ const props = defineProps({
   title: String,
 });
 
-const user = ref({
+/* const user = ref({
   personas: [],
-});
+}); */
 
 const openSubmenu = ref(false);
 
@@ -26,7 +26,7 @@ const isActive = (path) => {
 
 const activeClasess = `before:content-[''] before:absolute before:w-0 before:h-0 before:border-l-[20px] before:border-r-[20px] before:border-t-[37px] before:border-t-gray-100 before:border-l-transparent before:border-r-transparent before:left-1/2 before:-translate-x-1/2 before:-top-6 lg:before:border-l-[24px] lg:before:border-r-[24px] lg:before:border-t-[48px] lg:before:top-1/2 lg:before:-translate-y-1/2 lg:before:rotate-90 lg:before:left-auto lg:before:translate-x-0 lg:before:-right-9 `;
 
-const fetchUserData = async () => {
+/* const fetchUserData = async () => {
   try {
     const response = await axios.get(`${Constants.serverPath}/api/auth/userinfo`);
     user.value = response.data.user;
@@ -35,7 +35,7 @@ const fetchUserData = async () => {
   }
 };
 
-onMounted(fetchUserData);
+onMounted(fetchUserData); */
 </script>
 <template>
   <div
@@ -55,7 +55,7 @@ onMounted(fetchUserData);
           </div>
           <div class="relative">
             <button
-              v-if="user?.personas?.[0]?.nombre && user?.personas?.[0]?.apellido"
+              
               @click="openSubmenu = !openSubmenu"
               type="button"
               class="flex py-2 pl-7 pr-4 bg- gap-2 rounded-2xl border shadow relative bg-white hover:bg-primary-light group transition-all duration-75">
@@ -69,7 +69,7 @@ onMounted(fetchUserData);
               </div>
               <div class="flex items-center gap-1">
                 <span class="text-xs group-hover:text-primary">
-                  {{`${user?.personas?.[0]?.nombre} ${user?.personas?.[0]?.apellido}` }}
+                  Sofia
                 </span>
                 <ChevronDown class="w-2 h-2" />
               </div>
@@ -122,7 +122,7 @@ onMounted(fetchUserData);
         <div
           class="w-full h-full lg:h-20 relative"
           :class="isActive('/users') ? activeClasess : ''"
-          v-if="user.role_id !== 2">
+          >
           <router-link
             to="/users/select"
             class="w-full h-full flex items-center justify-center">

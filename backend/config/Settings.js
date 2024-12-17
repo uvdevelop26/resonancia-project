@@ -3,7 +3,9 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 
-const Config = {
+const Settings = {
+    /* root path */
+   // ROOT_DIR: path.resolve(__dirname),
     /* Path to the server */
     serverPath: `http://localhost:3000`,
 
@@ -41,4 +43,4 @@ const Config = {
     }
 }
 
-module.exports = Config;
+module.exports = Settings;
