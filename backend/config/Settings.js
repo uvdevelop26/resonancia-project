@@ -4,24 +4,23 @@ const fs = require('fs');
 const path = require('path');
 
 const Settings = {
-    /* root path */
-   // ROOT_DIR: path.resolve(__dirname),
-    /* Path to the server */
+
+    // Path to the server 
     serverPath: `http://localhost:3000`,
 
-    /* create web token */
-    createWebToken: (id, email, nombre, apellido, role) => {
+    // create web token 
+    createWebToken: (id, email, nombre, apellido, rol) => {
         return jwt.sign(
-            { id, email, nombre, apellido, role },
+            { id, email, nombre, apellido, rol },
             'secret webtoken user resonancia',
             {
-                /* 3 dias */
+                // 3 days in seconds 
                 expiresIn: 3 * 24 * 60 * 60
             }
         );
     },
 
-    /* configure multer */
+    // configure multer 
     configMulter: () => {
         const storage = multer.diskStorage({
             destination: (req, file, cb) => {

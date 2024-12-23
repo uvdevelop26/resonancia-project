@@ -11,7 +11,6 @@ import { useRouter } from "vue-router";
 import { Constants } from "@/js/Contants";
 
 const router = useRouter();
-
 const route = useRoute();
 const examene = ref({});
 const questionFlash = ref(false);
@@ -19,7 +18,7 @@ const message = ref("");
 
 const form = ref({
   id: "",
-  fecha_examene: "",
+  fecha: "",
   paciente: "",
   resultado: "",
   urls: [],
@@ -60,8 +59,8 @@ const fetchData = async () => {
 
     form.value = {
       id: examene.id,
-      fecha_examene: Utilities.getFormattedDate(examene.fecha_examene),
-      paciente: `${examene.user.personas[0].nombre} ${examene.user.personas[0].apellido}`,
+      fecha: Utilities.getFormattedDate(examene.fecha),
+      paciente: `${examene.user.persona.nombre} ${examene.user.persona.apellido}`,
       resultado: examene.resultado,
       urls: imagenes,
     };
@@ -73,14 +72,14 @@ const fetchData = async () => {
 onMounted(fetchData);
 </script>
 <template>
-  <AppLayout :title="`Examen ${Utilities.getFormattedDate(examene.fecha_examene)}`">
+  <AppLayout :title="`Examen ${Utilities.getFormattedDate(examene.fecha)}`">
     <template #content>
       <div class="w-full h-full overflow-y-auto flex flex-col gap-5 relative">
         <!-- question flas -->
         <QuestionFlash
           :show="questionFlash"
           title="¿Desea eliminar este Examen?"
-          :data="`Eliminar examen fecha ${form.fecha_examene}`"
+          :data="`Eliminar examen fecha ${form.fecha}`"
           @close="questionFlash = false"
           @continues="deleteExamen()"
         />
@@ -91,8 +90,8 @@ onMounted(fetchData);
               <TextInput
                 label="Fecha"
                 type="date"
-                id="fecha_examen"
-                v-model="form.fecha_examene"
+                id="fecha"
+                v-model="form.fecha"
                 :disabled="true"
                 maxWidth="xs"
               />

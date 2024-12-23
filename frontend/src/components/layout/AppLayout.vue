@@ -13,9 +13,7 @@ const props = defineProps({
   title: String,
 });
 
-/* const user = ref({
-  personas: [],
-}); */
+const user = ref({ nombre: '', apellido: '' });
 
 const openSubmenu = ref(false);
 
@@ -26,16 +24,44 @@ const isActive = (path) => {
 
 const activeClasess = `before:content-[''] before:absolute before:w-0 before:h-0 before:border-l-[20px] before:border-r-[20px] before:border-t-[37px] before:border-t-gray-100 before:border-l-transparent before:border-r-transparent before:left-1/2 before:-translate-x-1/2 before:-top-6 lg:before:border-l-[24px] lg:before:border-r-[24px] lg:before:border-t-[48px] lg:before:top-1/2 lg:before:-translate-y-1/2 lg:before:rotate-90 lg:before:left-auto lg:before:translate-x-0 lg:before:-right-9 `;
 
-/* const fetchUserData = async () => {
+const logout = async () => {
   try {
-    const response = await axios.get(`${Constants.serverPath}/api/auth/userinfo`);
-    user.value = response.data.user;
+    const response = await axios.get(
+      `${Constants.serverPath}/api/auth/logout`,
+      {
+        withCredentials: true, // Asegura que las cookies se envíen al backend
+      }
+    );
+
+    const message = response.data.msg;
+
+    if (message) {
+      router.push("/");
+    }
   } catch (error) {
-    console.error("Error al obtener los datos del usuario", error);
+    console.error("Error al cerrar sesión", error);
   }
 };
 
-onMounted(fetchUserData); */
+async function fetchUser() {
+  try {
+    const response = await axios.get(
+      `${Constants.serverPath}/api/auth/userinfo`,
+      {
+        withCredentials: true, // Para enviar cookies al backend
+      }
+    );
+
+    if (response.data.user) {
+      user.value = response.data.user;
+    }
+  } catch (error) {
+    console.error("Error al obtener el usuario:", error);
+    return null;
+  }
+}
+
+onMounted(fetchUser);
 </script>
 <template>
   <div
@@ -55,7 +81,6 @@ onMounted(fetchUserData); */
           </div>
           <div class="relative">
             <button
-              
               @click="openSubmenu = !openSubmenu"
               type="button"
               class="flex py-2 pl-7 pr-4 bg- gap-2 rounded-2xl border shadow relative bg-white hover:bg-primary-light group transition-all duration-75">
@@ -67,21 +92,21 @@ onMounted(fetchUserData); */
                   class="w-full h-full object-cover"
                 />
               </div>
-              <div class="flex items-center gap-1">
-                <span class="text-xs group-hover:text-primary">
-                  Sofia
-                </span>
+              <div class="flex items-center gap-1" v-if="user">
+                <span class="text-xs group-hover:text-primary"> 
+                  {{ user.nombre }} {{ user.apellido }}
+               </span>
                 <ChevronDown class="w-2 h-2" />
               </div>
             </button>
             <div
               class="w-32 h-20 absolute left-1/2 -translate-x-1/2 -bottom-[5.1rem] bg-white rounded-lg shadow-md overflow-hidden z-50"
               v-if="openSubmenu">
-              <router-link
-                to="/"
+              <button
+                @click="logout"
                 class="inline-block w-full border-b text-center py-2 px-2 hover:bg-primary-light hover:text-primary text-xs text-gray-500 font-bold md:text-sm">
                 Cerrar Sesión
-              </router-link>
+              </button>
             </div>
           </div>
         </header>
@@ -121,8 +146,7 @@ onMounted(fetchUserData); */
         </div>
         <div
           class="w-full h-full lg:h-20 relative"
-          :class="isActive('/users') ? activeClasess : ''"
-          >
+          :class="isActive('/users') ? activeClasess : ''">
           <router-link
             to="/users/select"
             class="w-full h-full flex items-center justify-center">

@@ -12,24 +12,22 @@ const PORT = process.env.PORT || 3000;
 
 const corsOptions = {
     origin: 'http://localhost:5173',
-    optionsSuccessStatus: 200,
+    //  optionsSuccessStatus: 200,
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    //  allowedHeaders: ['Content-Type', 'Authorization'],
 };
 
 app.use('/storage', express.static(path.join(__dirname, 'storage')));
 //app.use('/data', express.static(path.join(__dirname, 'data')));
 
 app.use(cors(corsOptions));
-/* parse JSON to javascript object */
+// parse JSON to javascript object
 app.use(express.json());
 app.use(cookieParser());
 
-/* routes user */
+// routes
 app.use('/api/auth', AuthRoutes);
 app.use('/api/users', UserRoutes);
-
-/* routes examene */
 app.use('/api/examenes', ExamenRoutes);
 
 db.sequelize.sync().then((req) => {

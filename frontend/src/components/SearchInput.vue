@@ -17,9 +17,24 @@ const props = defineProps({
   },
 });
 
-const filteredData = ref([...props.data]);
-const showList = ref(false);
-const showOnList = ref([]);
+const filteredData = ref([]);
+const showOnList = ref(false);
+
+watchEffect(() => {
+  const value = props.modelValue?.toLowerCase() || "";
+  const criteria = props.criteria || [];
+  const data = props.data || [];
+
+  value !== "" ? (showOnList.value = true) : (showOnList.value = false);
+
+  filteredData.value = data.filter((item) => {
+    // Verificar si alguno de los criterios coincide con el valor buscado
+    return criteria.some((crit) => {
+      const field = item[crit]?.toString().toLowerCase();
+      return field?.includes(value);
+    });
+  });
+});
 
 const cleanSearch = (event) => {
   if (event.key === "Backspace") {
@@ -27,79 +42,10 @@ const cleanSearch = (event) => {
   }
 };
 
-const generateShowText = (data) => {
-  const criteria = props.criteria;
-  const showData = criteria.map((crit) => data[crit]).join(" ");
-
-  return showData;
-};
-
-const select = (data) => {
-  const showData = generateShowText(data);
-
-  emit("update:modelValue", showData);
-  showList.value = false;
+const selectData = (data) => {
+  emit("update:modelValue", `${data.nombre} ${data.apellido} - ${data.dni}`);
   emit("action");
 };
-
-watchEffect(() => {
-  const searchData = props.modelValue.toLowerCase();
-  const criteria = props.criteria;
-
-  if (searchData) {
-    showList.value = true;
-    showOnList.value = filteredData.value.filter((data) => {
-      // Verifica si alguno de los criterios coincide
-      return criteria.some((crit) => {
-        return data[crit]?.toLowerCase().includes(searchData);
-      });
-    });
-  } else {
-    showList.value = false;
-    // Restablece los valores si no hay búsqueda
-    showOnList.value = [];
-  }
-});
-
-/* filtra los datos de acuerdo a los criterios */
-watchEffect(() => {
-  filteredData.value = [];
-
-  const criteria = props.criteria;
-  const data = props.data;
-
-  criteria.forEach((crit) => {});
-
-  /* 
-
-  criteria.forEach((crit) => {
-    data.forEach((dat) => {
-      for (let key in dat) {
-        if (key === crit) {
-          const exists = filteredData.value.some((item) => item.id === dat.id);
-          if (!exists) {
-            filteredData.value.push(dat);
-          }
-        }
-        if (Array.isArray(dat[key])) {
-          const subArray = dat[key];
-          subArray.forEach((sub) => {
-            for (let subKey in sub) {
-              if (subKey === crit) {
-                const subExists = filteredData.value.some(
-                  (item) => item.id === sub.id
-                );
-                if (!subExists) {
-                  filteredData.value.push(sub);
-                }
-              }
-            }
-          });
-        }
-      }
-    });
-  }); */
-});
 
 const errorClasess = computed(() => {
   return props.error ? "border-b-red-500" : "";
@@ -123,8 +69,7 @@ const emit = defineEmits(["update:modelValue", "action"]);
     <label v-if="label" :for="id" class="font-bold">{{ label }}:</label>
     <div
       class="w-full h-10 overflow-hidden relative border-b"
-      :class="errorClasess"
-    >
+      :class="errorClasess">
       <Search
         class="w-5 h-5 absolute top-1/2 -translate-y-1/2 left-2 fill-gray-400"
       />
@@ -142,20 +87,17 @@ const emit = defineEmits(["update:modelValue", "action"]);
     <div v-if="error" class="text-xs text-red-500">{{ error[0].msg }}</div>
     <!-- list -->
     <ul
-      v-if="showOnList.length > 0 && showList"
-      class="absolute z-50 w-full py-2 border-2 bg-white shadow top-[4.655rem] max-h-52 overflow-y-auto"
-    >
+      v-if="filteredData.length > 0 && showOnList"
+      class="absolute z-50 w-full py-2 border-2 bg-white shadow top-[4.655rem] max-h-52 overflow-y-auto cursor-pointer">
       <li
-        v-for="data in showOnList"
+        v-for="data in filteredData"
         :key="data.id"
-        class="text-sm p-2 text-gray-500 hover:bg-gray-200"
-      >
+        class="text-sm p-2 text-gray-500 hover:bg-gray-200">
         <button
           type="button"
           class="w-full h-full text-start"
-          @click="select(data)"
-        >
-          {{ generateShowText(data) }}
+          @click="selectData(data)">
+          {{ `${data.nombre} ${data.apellido} - ${data.dni}` }}
         </button>
       </li>
     </ul>

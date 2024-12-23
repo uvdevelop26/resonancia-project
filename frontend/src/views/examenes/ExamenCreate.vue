@@ -9,12 +9,18 @@ import { Constants } from "@/js/Contants";
 import { onMounted, ref, watchEffect } from "vue";
 import axios from "axios";
 import FileInput from "@/components/FileInput.vue";
+import ImageViewer from "@/components/ImageViewer.vue";
 
+// search data
 const pacientes = ref([]);
+const pacientesSearch = ref([]);
 const search = ref("");
-const errors = ref({});
-const handlePreview = ref(false);
+//file handlers data
+const fileNames = ref([]);
+const photosPreview = ref([]);
+//other
 const message = ref("");
+const errors = ref({});
 
 const form = ref({
   fecha: "",
@@ -30,15 +36,16 @@ const close = () => {
 const cleanFormEx = () => {
   Utilities.cleanForm(form);
   search.value = "";
-  handlePreview.value = true;
+  fileNames.value = [];
+  photosPreview.value = [];
 };
 
 const action = () => {
-  const value = search.value;
-  const parts = value.split(" ");
-  const dni = parts[parts.length - 1];
+  const value = search.value?.toLowerCase();
 
-  form.value.user_id = "";
+  const parts = value.split(" ");
+
+  const dni = parts[parts.length - 1];
 
   const user = pacientes.value.filter(
     (paciente) => paciente.persona.dni === dni
@@ -53,6 +60,39 @@ watchEffect(() => {
     form.value.user_id = "";
   }
 });
+
+const fileHandler = (event) => {
+  const files = event.target.files;
+  if (!files.length) return;
+
+  const filesArrayTmp = [];
+
+  for (const file of files) {
+    fileNames.value.push(file.name);
+    filesArrayTmp.push(file);
+
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      photosPreview.value.push(e.target.result);
+    };
+
+    reader.onerror = (error) => {
+      console.error(`Error leyendo el archivo ${file.name}:`, error);
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  form.value.url = filesArrayTmp;
+};
+
+const handleRemoveImage = (index) => {
+  photosPreview.value.splice(index, 1);
+  fileNames.value.splice(index, 1);
+  form.value.url.splice(index, 1);
+  //emit("update:modelValue", filesArray.value);
+};
 
 const store = async () => {
   const formData = new FormData();
@@ -90,9 +130,8 @@ const store = async () => {
           error.response.data.errors
         );
       }
-
       console.error("Error en el login:");
-    } 
+    }
   }
 };
 
@@ -104,7 +143,9 @@ const fetchData = async () => {
 
     pacientes.value = response.data;
 
-    console.log(pacientes.value)
+    response.data.forEach((res) => {
+      pacientesSearch.value.push(res.persona);
+    });
   } catch (error) {
     console.error("Error en el servidor", error);
   }
@@ -128,8 +169,7 @@ onMounted(fetchData);
         <div class="w-full rounded-lg bg-white shadow-md p-4 lg:p-6 mt-4">
           <form @submit.prevent="store" class="flex flex-col gap-4">
             <div
-              class="flex flex-col gap-4 w-full items-center md:flex-row md:items-start md:flex-wrap"
-            >
+              class="flex flex-col gap-4 w-full items-center md:flex-row md:items-start md:flex-wrap">
               <TextInput
                 label="Fecha"
                 type="date"
@@ -143,23 +183,31 @@ onMounted(fetchData);
                 id="user_id"
                 label="Buscar Paciente"
                 v-model="search"
-                :data="pacientes"
+                :data="pacientesSearch"
                 :criteria="['nombre', 'apellido', 'dni']"
                 :error="errors.user_id"
                 @action="action"
                 maxWidth="sm"
               />
-              <FileInput
-                label="Selecciona Archivo"
-                id="url"
-                accept=".jpeg, .jpg, .png"
-                multiple="true"
-                placeholder=".jpeg, .jpg, .png"
-                maxWidth="sm"
-                v-model="form.url"
-                :error="errors.url"
-                :clean-preview="handlePreview"
-              />
+              <div class="flex flex-col gap-2 w-full relative max-w-sm">
+                <FileInput
+                  label="Selecciona Archivo"
+                  id="url"
+                  accept=".jpeg, .jpg, .png"
+                  multiple="true"
+                  placeholder=".jpeg, .jpg, .png"
+                  maxWidth="sm"
+                  :error="errors.url"
+                  @change="fileHandler"
+                />
+                <ImageViewer
+                  :show="photosPreview.length > 0"
+                  :images="photosPreview"
+                  @remove="handleRemoveImage"
+                  maxWidth="sm"
+                  class="lg:absolute lg:left-0 lg:-bottom-[134px]"
+                />
+              </div>
               <TextArea
                 label="Resultados"
                 id="resultado"
@@ -169,11 +217,11 @@ onMounted(fetchData);
                 placeholder="Los resultados se generarán en segundos.."
               />
             </div>
-            <div class="flex flex-col gap-4 w-full items-center md:flex-row">
+            <div
+              class="flex flex-col gap-4 w-full items-center md:mt-4 md:flex-row">
               <button
                 type="submit"
-                class="h-10 w-72 bg-primary self-center text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8"
-              >
+                class="h-10 w-72 bg-primary self-center text-white shadow font-bold rounded-lg text-sm hover:bg-primary-light hover:text-primary md:mt-8">
                 Guardar
               </button>
             </div>

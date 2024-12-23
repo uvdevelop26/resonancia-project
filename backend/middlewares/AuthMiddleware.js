@@ -1,26 +1,58 @@
 const jwt = require('jsonwebtoken');
 
-const authMiddleware = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
+const requireAuth = (req, res, next) => {
 
-    if (!authHeader) {
-        return res.status(401).json({ msg: "No se proporcionó un token" });
-    }
+    //grab the token from the cookies
+    const token = req.cookies.jwt;
 
-    const token = authHeader.split(' ')[1];
+    //check if the jwt exists and is verified
+    if (token) {
+        jwt.verify(token, 'secret webtoken user resonancia', (err, decodedToken) => {
+            if (err) {
+                console.log(err);
+                return res.status(401).json({ msg: "Token inválido. Por favor, inicie sesión nuevamente." });
+            } else {
+                console.log(decodedToken);
+                next();
+            }
+        });
 
-    if (!token) {
-        return res.status(401).json({ msg: "Token inválido" });
-    }
-
-    try {
-        // Verificar el token
-        const decoded = jwt.verify(token, 'secret webtoken user resonancia');
-        req.user = decoded; // Guardar los datos del usuario en la solicitud
-        next();
-    } catch (error) {
-        return res.status(403).json({ msg: "Token no válido" });
+    } else {
+        return res.status(401).json({ msg: "No autorizado. Inicie sesión." });
     }
 };
 
-module.exports = authMiddleware;
+/* const checkUser = (req, res, next) => {
+
+    const token = req.cookies.jwt;
+
+    if (token) {
+
+        jwt.verify(token, 'secret webtoken user resonancia', (err, decodedToken) => {
+            if (err) {
+                console.log(err);
+                //res.locals.user = null
+                next();
+            } else {
+                const user = {
+                    id: decodedToken.id,
+                    email: decodedToken.email,
+                    nombre: decodedToken.nombre,
+                    apellido: decodedToken.apellido,
+                    rol: decodedToken.rol
+                }
+
+                //res.locals.user = user
+
+                //inject the info in our views
+            }
+        });
+
+    } else {
+        //res.locals.user = null
+        next()
+    }
+
+} */
+
+module.exports = requireAuth;

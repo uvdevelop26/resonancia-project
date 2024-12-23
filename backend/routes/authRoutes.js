@@ -14,7 +14,10 @@ router.post('/login', AuthValidator(), (req, res, next) => {
     next();
 }, AuthController.login);
 
-// Ruta protegida para obtener la información del usuario
-router.get('/userinfo', AuthMiddleware, AuthController.getUserInfo);
+router.get('/logout', AuthController.logout);
+
+router.get('/verify', AuthController.verify);
+
+router.get('/userinfo', AuthController.getUserInfo);
 
 module.exports = router;

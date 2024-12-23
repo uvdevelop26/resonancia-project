@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { Constants } from '@/js/Contants'
+import axios from 'axios'
 import Login from '@/views/Login.vue'
 import DashboardView from "@/views/DashboardView.vue"
 import SelectUserView from '@/views/users/SelectUserView.vue'
@@ -23,7 +25,8 @@ const router = createRouter({
     {
       path: '/dashboard',
       name: 'dashboard',
-      component: DashboardView
+      component: DashboardView,
+      meta: { requiresAuth: true }
     },
     /* users */
     {
@@ -92,7 +95,29 @@ const router = createRouter({
   ]
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
+  if (to.matched.some(record => record.meta.requiresAuth)) {
+    try {
+      // Verificar el token con el backend
+      const response = await axios.get(`${Constants.serverPath}/api/auth/verify`, {
+        withCredentials: true, // Esto envía las cookies al backend
+      });
+
+      if (response.status === 200) {
+        next(); // Permitir acceso a la ruta
+      } else {
+        next({ name: 'login' }); // Redirigir al login
+      }
+    } catch (error) {
+      console.error("Error de autenticación:", error);
+      next({ name: 'login' }); // Redirigir al login si no es válido
+    }
+  } else {
+    next(); // Permitir acceso a rutas públicas
+  }
+});
+
+/* router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token');
 
   if (to.matched.some(record => record.meta.requiresAuth)) {
@@ -104,6 +129,6 @@ router.beforeEach((to, from, next) => {
   } else {
     next();
   }
-});
+}); */
 
 export default router;

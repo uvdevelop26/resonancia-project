@@ -28,8 +28,8 @@ const login = async () => {
   try {
     const response = await axios.post(
       `${Constants.serverPath}/api/auth/login`,
-      form.value
-      /*  { withCredentials: true } */
+      form.value,
+      { withCredentials: true }
     );
 
     /*  localStorage.setItem("jwt", response.data.token);
@@ -40,7 +40,11 @@ const login = async () => {
 
     message.value = response.data.msg;
 
-    router.push("/dashboard");
+    const data = response.data.user;
+
+    if (data) {
+      router.push("/dashboard");
+    }
   } catch (error) {
     if (error.response) {
       message.value = error.response.data.msg;

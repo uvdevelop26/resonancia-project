@@ -50,6 +50,7 @@ const fetchData = async () => {
 
     examenes.value = examenesResponse.data;
 
+
     // user.value = userResponse.data.user;
 
     /*  if(route.query.message !== ""){
