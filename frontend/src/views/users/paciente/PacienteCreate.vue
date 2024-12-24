@@ -7,9 +7,9 @@ import axios from "axios";
 import { ref, onMounted } from "vue";
 import { Utilities } from "@/js/Utilities";
 
-/* create form */
+// create form 
 const form = ref({
-  /* persona */
+  // persona 
   nombre: "",
   apellido: "",
   slug: "",
@@ -21,9 +21,10 @@ const form = ref({
   edad: "",
   ciudad_id: "",
   departamento_id: "",
-  /* user */
+  // user 
   email: "",
   password: "",
+  confirmPassword: "",
   profile_photo_path: "",
   rol_id: "",
 });
@@ -252,6 +253,14 @@ onMounted(fechData);
                 maxWidth="sm"
                 :error="errors.password"
                 v-model="form.password"
+              />
+              <TextInput
+                label="Repetir Contraseña"
+                type="password"
+                id="confirmPassword"
+                maxWidth="sm"
+                :error="errors.confirmPassword"
+                v-model="form.confirmPassword"
               />
               <SelectInput
                 label="Rol"

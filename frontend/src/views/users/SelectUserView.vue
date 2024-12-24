@@ -41,7 +41,7 @@ const enter = (el, done) => {
             <AdminUser class="w-4 h-4 fill-white group-hover:fill-primary" />
           </div>
           <span
-            class="text-lg text-primary font-bold italic group-hover:text-primary-light">
+            class="text-lg text-primary font-bold group-hover:text-primary-light">
             Administradores
           </span>
         </router-link>
@@ -55,7 +55,7 @@ const enter = (el, done) => {
             <PacienteUser class="w-4 h-4 fill-white group-hover:fill-primary" />
           </div>
           <span
-            class="text-lg text-primary font-bold italic group-hover:text-primary-light">
+            class="text-lg text-primary font-bold group-hover:text-primary-light">
             Pacientes
           </span>
         </router-link>

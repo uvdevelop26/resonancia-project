@@ -24,6 +24,7 @@ const form = ref({
   /* user */
   email: "",
   password: "",
+  confirmPassword: "",
   profile_photo_path: "",
   rol_id: "",
 });
@@ -133,7 +134,7 @@ onMounted(fechData);
                 @input="getSlug()"
               />
               <TextInput
-                label="Apellidos"
+                label="Apellido"
                 type="text"
                 id="apellidos"
                 maxWidth="xs"
@@ -250,6 +251,14 @@ onMounted(fechData);
                 maxWidth="xs"
                 :error="errors.password"
                 v-model="form.password"
+              />
+              <TextInput
+                label="Repetir Contraseña"
+                type="password"
+                id="confirmPassword"
+                maxWidth="xs"
+                :error="errors.confirmPassword"
+                v-model="form.confirmPassword"
               />
               <SelectInput
                 label="Rol"

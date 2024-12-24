@@ -13,62 +13,83 @@ En la carpeta de tu elección hacer click derecho y abrir Git Bush
    code .
 ```
 
-## Instalar dependencias
+## Configurar el backend
 
-Instala npm en la carpeta backend
+Ingresa a la carpeta backend e instala npm
 
 ```
     cd backend
     npm install
 ```
-Instala npm en la carpeta frontend
+
+Después de crear una base de datos mysql abrir el
+archivo en el directorio "config/config.json"
 
 ```
-    cd ../
-    cd frontend
+{
+  "development": {
+    "username": "root", //username de la db
+    "password": null, //contraseña de la db si tiene
+    "database": "db_resonancia", //nombre de la base de datos
+    "host": "localhost",
+    "dialect": "mysql"
+  },
+  "test": {
+    "username": "root",
+    "password": null,
+    "database": "database_test",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "root",
+    "password": null,
+    "database": "database_production",
+    "host": "127.0.0.1",
+    "dialect": "mysql"
+  }
+}
+
+```
+
+Ejecuta las migraciones en la terminal con el comando:
+
+```
+    npx sequelize-cli db:migrate
+
+```
+
+Ejecuta los seeders en la terminal con el comando:
+
+```
+
+    npx sequelize-cli db:seed:all
+
+```
+
+Finalmente levanta el servidor ingresando el siguiente comando:
+
+```
+    nodemon app
+
+```
+
+## Configura el frontend
+
+Abre obra terminal y navega al frontend, luego ejecuta:
+
+```
     npm install
-```
-
-## Configurar base de datos
-
-En el directorio backend/config/db.js configura la base de datos
-
-```
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'tu-contraseña',
-    database: 'db_resonancia'
-});
-
-
-```   
-
-## Encripta la contraseña
-
-Navega al backend (cd backend) y ejecuta:
-
-```
-nodemon encrypt_password
 
 ```
 
-
-## Levanta el servidor para explorar el sistema
-
-Levanta el servidor del backend
-```
-cd backend
-nodemon app
+Abre el servidor local ejecutando el comando:
 
 ```
-abre otra terminal y levanta el frontend
-
-```
-cd frontend
 npm run dev
 
 ```
 Abre el servidor que provee en la terminal del frontend "http://localhost:5173/"
 
-## Ingresa al Sistema utilizando el usuario usuarioadm@gmail.com y la contraseña 123456
+
+## Ingresa al Sistema utilizando el usuario admin@example.com y la contraseña 12345678

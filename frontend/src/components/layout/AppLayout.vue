@@ -145,6 +145,7 @@ onMounted(fetchUser);
           </router-link>
         </div>
         <div
+          v-if="user && user.rol === 'administrador'"
           class="w-full h-full lg:h-20 relative"
           :class="isActive('/users') ? activeClasess : ''">
           <router-link

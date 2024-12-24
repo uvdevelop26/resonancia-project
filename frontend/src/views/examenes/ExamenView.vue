@@ -13,7 +13,7 @@ import gsap from "gsap";
 const route = useRoute();
 const router = useRouter();
 const examenes = ref([]);
-const user = ref(null);
+const user = ref({});
 const message = ref("");
 const showDeleteSuccess = ref(false);
 
@@ -40,33 +40,38 @@ const enter = (el, done) => {
 
 const fetchData = async () => {
   try {
-    /* const userResponse = await axios.get(
-      `${Constants.serverPath}/api/auth/userinfo`
-    ); */
+    //user autenticado
+    const userResponse = await axios.get(
+      `${Constants.serverPath}/api/auth/userinfo`,
+      {
+        withCredentials: true, // Para enviar cookies al backend
+      }
+    );
 
+    //examenes
     const examenesResponse = await axios.get(
       `${Constants.serverPath}/api/examenes/`
     );
 
     examenes.value = examenesResponse.data;
 
+    user.value = userResponse.data.user;
 
-    // user.value = userResponse.data.user;
-
-    /*  if(route.query.message !== ""){
-      message.value = route.query.message;
-      showDeleteSuccess.value = true;
-
-      router.replace({ query: { ...route.query, message: undefined } });
-    } */
-    /* 
-    if (user.value.role_id === 2) {
+    if (user.value.rol === "paciente") {
       examenes.value = examenesResponse.data.filter(
         (examene) => examene.user.id === user.value.id
       );
     } else {
       examenes.value = examenesResponse.data;
-    } */
+    }
+
+    //activate flash message
+    if (route.query.message !== "") {
+      message.value = route.query.message;
+      showDeleteSuccess.value = true;
+
+      router.replace({ query: { ...route.query, message: undefined } });
+    }
   } catch (error) {
     console.error("Error al obtener los datos", error);
   }

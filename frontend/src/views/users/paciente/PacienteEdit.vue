@@ -10,16 +10,16 @@ import { Utilities } from "@/js/Utilities";
 
 const route = useRoute();
 
-/*  values */
+//  values 
 const ciudades = ref([]);
 const departamentos = ref([]);
 const message = ref("");
 const errors = ref({});
 const rol = ref({});
 
-/* form edit */
+// form edit 
 const form = ref({
-  /* persona */
+  // persona 
   id: "",
   nombre: "",
   apellido: "",
@@ -31,7 +31,7 @@ const form = ref({
   edad: "",
   ciudad_id: "",
   departamento_id: "",
-  /* user */
+  // user 
   email: "",
   password: "",
   slug: "",
@@ -40,7 +40,7 @@ const form = ref({
   persona_id: "",
 });
 
-/* functions */
+// functions 
 
 const close = () => {
   Utilities.close(message);
@@ -51,7 +51,7 @@ const getSlug = () => {
   form.value.slug = slug;
 };
 
-/* update user */
+// update user 
 const update = async () => {
   const { slug } = route.params;
 
@@ -62,6 +62,9 @@ const update = async () => {
     );
 
     message.value = response.data.msg;
+
+    errors.value = {};
+    
   } catch (error) {
     if (error.response) {
       message.value = error.response.data.msg;
@@ -76,7 +79,7 @@ const update = async () => {
   }
 };
 
-/* fetch data */
+// fetch data 
 const fetchData = async () => {
   const { slug } = route.params;
 
@@ -94,7 +97,7 @@ const fetchData = async () => {
 
     form.value = {
       id: user.id,
-      /* persona */
+      // persona 
       nombre: user.persona.nombre,
       apellido: user.persona.apellido,
       dni: user.persona.dni,
@@ -105,7 +108,7 @@ const fetchData = async () => {
       ciudad_id: user.persona.ciudad_id,
       departamento_id: user.persona.ciudad.departamento_id,
       direccion: user.persona.direccion,
-      /* user */
+      // user 
       email: user.email,
       password: "",
       slug: user.slug,
@@ -276,6 +279,15 @@ onMounted(fetchData);
                 placeholder="Déjala en blanco si no deseas cambiarla"
                 :error="errors.password"
                 v-model="form.password"
+              />
+              <TextInput
+                label="Contraseña"
+                type="password"
+                id="confirmPassword"
+                maxWidth="xs"
+                placeholder="Déjala en blanco si no deseas cambiarla"
+                :error="errors.confirmPassword"
+                v-model="form.confirmPassword"
               />
               <SelectInput
                 label="Rol"

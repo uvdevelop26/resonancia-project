@@ -105,38 +105,6 @@ const AuthController = {
         });
 
     }
-
-
-
-
-    /* getUserInfo: async (req, res) => {
-        try {
-            // Obtener el usuario desde la base de datos utilizando el ID del token
-            const user = await User.findOne({
-                where: { id: req.user.id },
-                include: [
-                    {
-                        model: Persona,
-                        as: 'personas',
-                    },
-                    {
-                        model: Role,
-                        as: 'role'
-                    }
-                ]
-            });
-
-            if (!user) {
-                return res.status(404).json({ msg: "Usuario no encontrado" });
-            }
-
-            // Retornar la información del usuario
-            return res.status(200).json({ user });
-        } catch (error) {
-            return res.status(500).json({ msg: "Error en el servidor" });
-        }
-    } */
-
 };
 
 module.exports = AuthController;
