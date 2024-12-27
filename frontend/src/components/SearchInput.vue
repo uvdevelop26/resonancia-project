@@ -8,12 +8,16 @@ const props = defineProps({
   modelValue: String,
   label: String,
   data: Array,
-  /* criterio de la búsqueda */
+  // criterio de la búsqueda
   criteria: Array,
   error: Array,
   maxWidth: {
     type: String,
     default: "2xl",
+  },
+  background: {
+    type: String,
+    default: "bg-gray-100",
   },
 });
 
@@ -59,6 +63,7 @@ const maxWidthClass = computed(() => {
     lg: "sm:max-w-lg",
     xl: "sm:max-w-xl",
     "2xl": "sm:max-w-2xl",
+    "4xl": "sm:max-w-4xl",
   }[props.maxWidth];
 });
 
@@ -78,6 +83,7 @@ const emit = defineEmits(["update:modelValue", "action"]);
         :id="id"
         :placeholder="placeholder"
         class="h-full w-full pl-9 pr-2 text-sm bg-gray-100 text-primary placeholder:text-xs placeholder:italic focus:outline-none"
+        :class="background"
         :value="modelValue"
         @input="$emit('update:modelValue', $event.target.value)"
         @keydown="cleanSearch"

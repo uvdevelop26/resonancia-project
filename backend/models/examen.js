@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
 
       Examen.belongsTo(models.User, {
         foreignKey: 'user_id',
+        onDelete: 'CASCADE',
         as: 'user'
       });
     }

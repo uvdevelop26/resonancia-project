@@ -2,20 +2,44 @@
 import AppLayout from "@/components/layout/AppLayout.vue";
 import Edit from "@/components/icons/Edit.vue";
 import Delete from "@/components/icons/Delete.vue";
+import SearchInput from "@/components/SearchInput.vue";
 import FlashMessage from "@/components/FlashMessage.vue";
 import QuestionFlash from "@/components/QuestionFlash.vue";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watchEffect } from "vue";
 import { Utilities } from "@/js/Utilities";
 import { Constants } from "@/js/Contants";
 import axios from "axios";
 import gsap from "gsap";
 
 const users = ref([]);
+const filteredUsers = ref([]);
 const message = ref("");
 const questionFlashIndex = ref(null);
+const administradoresSearch = ref([]);
+const search = ref("");
 
 const close = () => {
   Utilities.close(message);
+};
+
+watchEffect(() => {
+  const value = search.value;
+
+  if (value === "") {
+    filteredUsers.value = users.value;
+  }
+});
+
+const action = () => {
+  const value = search.value?.toLowerCase();
+
+  const parts = value.split(" ");
+
+  const dni = parts[parts.length - 1];
+
+  filteredUsers.value = filteredUsers.value.filter(
+    (fill) => fill.persona.dni === dni
+  );
 };
 
 const beforeEnter = (el) => {
@@ -46,8 +70,20 @@ const deleteUser = async (slug) => {
       message.value = response.data.msg;
     }, 300);
 
-    /* Filtra el usuario eliminado de la lista de usuarios */
+    // Filtra el usuario eliminado de la lista de usuarios
+    filteredUsers.value = filteredUsers.value.filter(
+      (user) => user.slug !== slug
+    );
     users.value = users.value.filter((user) => user.slug !== slug);
+
+    // Actualiza la lista de búsqueda
+    administradoresSearch.value = administradoresSearch.value.filter(
+      (persona) =>
+        persona.dni !==
+        filteredUsers.value.find((user) => user.slug === slug)?.persona.dni
+    );
+    // Reinicia el valor de búsqueda
+    search.value = "";
   } catch (error) {
     console.error("Error al eliminar el usuario:", error);
   }
@@ -58,8 +94,17 @@ const fetchUsers = async () => {
     const response = await axios.get(
       `${Constants.serverPath}/api/users/administrador`
     );
+
+    //valor permanente
     users.value = response.data;
 
+    //valor para filtro
+    filteredUsers.value = response.data;
+
+    //filtro para la búsqueda
+    response.data.forEach((res) => {
+      administradoresSearch.value.push(res.persona);
+    });
   } catch (error) {
     console.error(error);
   }
@@ -79,10 +124,19 @@ onMounted(fetchUsers);
           :message="message"
           @close="close"
         />
-        <!-- search bar -->
         <div
           class="w-full flex justify-between gap-2 items-center mt-4 md:gap-8">
-          <!--    <SearchInput v-model="search" /> -->
+          <!-- search bar -->
+          <SearchInput
+            placeholder="Busca por nombre, apellido o CI. Selecciona en la lista"
+            id="search"
+            v-model="search"
+            :data="administradoresSearch"
+            :criteria="['nombre', 'apellido', 'dni']"
+            @action="action"
+            background="bg-white"
+            maxWidth="3xl"
+          />
           <router-link
             to="/users/administrador/create"
             class="w-28 h-8 text-white font-bold bg-primary flex items-center justify-center rounded-lg shadow-lg hover:bg-primary-light hover:text-primary hover:border">
@@ -147,7 +201,7 @@ onMounted(fetchUsers);
               <template v-else>
                 <tr
                   class="h-14 text-center shadow group"
-                  v-for="(user, index) in users"
+                  v-for="(user, index) in filteredUsers"
                   :key="user.id"
                   :data-index="index">
                   <td

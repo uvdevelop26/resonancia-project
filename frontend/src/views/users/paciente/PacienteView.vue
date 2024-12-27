@@ -5,26 +5,40 @@ import Delete from "@/components/icons/Delete.vue";
 import FlashMessage from "@/components/FlashMessage.vue";
 import QuestionFlash from "@/components/QuestionFlash.vue";
 import SearchInput from "@/components/SearchInput.vue";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watchEffect } from "vue";
 import { Utilities } from "@/js/Utilities";
 import axios from "axios";
 import gsap from "gsap";
 
 const users = ref([]);
+const filteredUsers = ref([]);
 const message = ref("");
 const questionFlashIndex = ref(null);
+const pacientesSearch = ref([]);
 const search = ref("");
 
 const close = () => {
   Utilities.close(message);
 };
 
-const closeQuestiosFlash = () => {
-  questionFlashIndex.value = null;
-};
+watchEffect(() => {
+  const value = search.value;
 
-const showQuestionFlash = (index) => {
-  questionFlashIndex.value = index;
+  if (value === "") {
+    filteredUsers.value = users.value;
+  }
+});
+
+const action = () => {
+  const value = search.value?.toLowerCase();
+
+  const parts = value.split(" ");
+
+  const dni = parts[parts.length - 1];
+
+  filteredUsers.value = filteredUsers.value.filter(
+    (fill) => fill.persona.dni === dni
+  );
 };
 
 const beforeEnter = (el) => {
@@ -55,8 +69,20 @@ const deleteUser = async (slug) => {
       message.value = response.data.msg;
     }, 300);
 
-    /* Filtra el usuario eliminado de la lista de usuarios */
+    // Filtra el usuario eliminado de la lista de usuarios
+    filteredUsers.value = filteredUsers.value.filter(
+      (user) => user.slug !== slug
+    );
     users.value = users.value.filter((user) => user.slug !== slug);
+
+    // Actualiza la lista de búsqueda
+    pacientesSearch.value = pacientesSearch.value.filter(
+      (persona) =>
+        persona.dni !==
+        filteredUsers.value.find((user) => user.slug === slug)?.persona.dni
+    );
+    // Reinicia el valor de búsqueda
+    search.value = "";
   } catch (error) {
     console.error("Error al eliminar el usuario:", error);
   }
@@ -67,7 +93,17 @@ const fetchUsers = async () => {
     const response = await axios.get(
       "http://localhost:3000/api/users/paciente"
     );
+
+    //valor permanente
     users.value = response.data;
+
+    //valor para filtro
+    filteredUsers.value = response.data;
+
+    //filtro para la búsqueda
+    response.data.forEach((res) => {
+      pacientesSearch.value.push(res.persona);
+    });
   } catch (error) {
     console.error(error);
   }
@@ -88,10 +124,19 @@ onMounted(fetchUsers);
           @close="close"
         />
 
-        <!-- search bar -->
         <div
           class="w-full flex justify-between gap-2 items-center mt-4 md:gap-8">
-          <!--  <SearchInput v-model="search" /> -->
+          <!-- search bar -->
+          <SearchInput
+            placeholder="Busca por nombre, apellido o CI. Selecciona en la lista"
+            id="search"
+            v-model="search"
+            :data="pacientesSearch"
+            :criteria="['nombre', 'apellido', 'dni']"
+            @action="action"
+            background="bg-white"
+            maxWidth="3xl"
+          />
           <router-link
             to="/users/paciente/create"
             class="w-28 h-8 text-white font-bold bg-primary flex items-center justify-center rounded-lg shadow-lg hover:bg-primary-light hover:text-primary hover:border">
@@ -154,7 +199,7 @@ onMounted(fetchUsers);
               <template v-else>
                 <tr
                   class="h-14 text-center shadow group border-b-2"
-                  v-for="(user, index) in users"
+                  v-for="(user, index) in filteredUsers"
                   :key="user.id"
                   :data-index="index">
                   <td
@@ -195,7 +240,7 @@ onMounted(fetchUsers);
                         <Edit class="w-3 h-3 fill-primary" />
                       </router-link>
                       <button
-                        @click="showQuestionFlash(index)"
+                        @click="questionFlashIndex = index"
                         class="inline-block border bg-primary-light px-3 py-3 rounded-full bg-light-green-two hover:shadow-md">
                         <Delete class="w-3 h-3 fill-primary" />
                       </button>
@@ -206,7 +251,7 @@ onMounted(fetchUsers);
                     title="¿Desea eliminar este usuario?"
                     :data="`Eliminar a ${user.persona.nombre} de la lista`"
                     @continues="deleteUser(user.slug)"
-                    @close="closeQuestiosFlash"
+                    @close="questionFlashIndex = null"
                   />
                 </tr>
               </template>
