@@ -10,14 +10,13 @@ import { Utilities } from "@/js/Utilities";
 
 const route = useRoute();
 
-//  values 
+// variables reactives 
 const ciudades = ref([]);
 const departamentos = ref([]);
 const message = ref("");
 const errors = ref({});
 const rol = ref({});
 
-// form edit 
 const form = ref({
   // persona 
   id: "",
@@ -41,7 +40,6 @@ const form = ref({
 });
 
 // functions 
-
 const close = () => {
   Utilities.close(message);
 };

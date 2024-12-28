@@ -78,6 +78,23 @@ const Utilities = {
 
         return newObject;
     },
+
+    getDniFromString: (search) => {
+        if (isRef(search)) {
+            const value = search.value?.toLowerCase();
+
+            const parts = value.split(" ");
+
+            const dni = parts[parts.length - 1];
+
+            return dni;
+            
+        } else {
+            console.error("La variable es inválida")
+        }
+
+
+    }
 }
 
 export { Utilities }

@@ -13,6 +13,7 @@ import PacienteEdit from '@/views/users/paciente/PacienteEdit.vue'
 import ExamenView from '@/views/examenes/ExamenView.vue'
 import ExamenCreate from '@/views/examenes/ExamenCreate.vue'
 import ExamenShow from '@/views/examenes/ExamenShow.vue'
+import NotFound from '@/views/NotFound.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -90,6 +91,11 @@ const router = createRouter({
       name: 'ExamenShow',
       component: ExamenShow,
       meta: { requiresAuth: true },
+    },
+    {
+      path: '/:pathMatch(.*)*', // Ruta comodín
+      name: 'NotFound',
+      component: NotFound
     }
 
   ]
@@ -100,20 +106,20 @@ router.beforeEach(async (to, from, next) => {
     try {
       // Verificar el token con el backend
       const response = await axios.get(`${Constants.serverPath}/api/auth/verify`, {
-        withCredentials: true, // Esto envía las cookies al backend
+        withCredentials: true,
       });
 
       if (response.status === 200) {
-        next(); // Permitir acceso a la ruta
+        next();
       } else {
-        next({ name: 'login' }); // Redirigir al login
+        next({ name: 'login' }); 
       }
     } catch (error) {
       console.error("Error de autenticación:", error);
-      next({ name: 'login' }); // Redirigir al login si no es válido
+      next({ name: 'login' }); 
     }
   } else {
-    next(); // Permitir acceso a rutas públicas
+    next();
   }
 });
 

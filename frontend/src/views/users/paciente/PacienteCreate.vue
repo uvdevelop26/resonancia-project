@@ -7,7 +7,7 @@ import axios from "axios";
 import { ref, onMounted } from "vue";
 import { Utilities } from "@/js/Utilities";
 
-// create form 
+// variables reactivas 
 const form = ref({
   // persona 
   nombre: "",
@@ -51,7 +51,7 @@ const close = () => {
 };
 
 
-/* create new user */
+// create new user 
 const store = async () => {
   try {
     const response = await axios.post(
@@ -79,7 +79,7 @@ const store = async () => {
   }
 };
 
-/* Resquest data from the server */
+// Resquest data from the server 
 const fechData = async () => {
   try {
     const response = await axios.get(

@@ -8,9 +8,10 @@ import QuestionFlash from "@/components/QuestionFlash.vue";
 import { ref, onMounted, watchEffect } from "vue";
 import { Utilities } from "@/js/Utilities";
 import { Constants } from "@/js/Contants";
+import { Animations } from "@/js/Aminations";
 import axios from "axios";
-import gsap from "gsap";
 
+//variables reactivas
 const users = ref([]);
 const filteredUsers = ref([]);
 const message = ref("");
@@ -18,8 +19,17 @@ const questionFlashIndex = ref(null);
 const administradoresSearch = ref([]);
 const search = ref("");
 
+//funciones
 const close = () => {
   Utilities.close(message);
+};
+
+const action = () => {
+  const dni = Utilities.getDniFromString(search);
+
+  filteredUsers.value = filteredUsers.value.filter(
+    (fill) => fill.persona.dni === dni
+  );
 };
 
 watchEffect(() => {
@@ -30,34 +40,7 @@ watchEffect(() => {
   }
 });
 
-const action = () => {
-  const value = search.value?.toLowerCase();
-
-  const parts = value.split(" ");
-
-  const dni = parts[parts.length - 1];
-
-  filteredUsers.value = filteredUsers.value.filter(
-    (fill) => fill.persona.dni === dni
-  );
-};
-
-const beforeEnter = (el) => {
-  el.style.transform = "translateX(-60px)";
-  el.style.opacity = 0;
-};
-
-const enter = (el, done) => {
-  gsap.to(el, {
-    duration: 0.6,
-    x: 0,
-    opacity: 1,
-    onComplete: done,
-    delay: el.dataset.index * 0.1,
-    ease: "power3.out",
-  });
-};
-
+//llamadas al backend
 const deleteUser = async (slug) => {
   try {
     const response = await axios.delete(
@@ -106,7 +89,7 @@ const fetchUsers = async () => {
       administradoresSearch.value.push(res.persona);
     });
   } catch (error) {
-    console.error(error);
+    console.error("Error al obtener usuarios",error);
   }
 };
 
@@ -184,8 +167,8 @@ onMounted(fetchUsers);
             </thead>
             <transition-group
               tag="tbody"
-              @before-enter="beforeEnter"
-              @enter="enter"
+              @before-enter="Animations.tableBeforeEnter"
+              @enter="Animations.tableEnter"
               appear>
               <!-- si no existen usurarios cargados -->
               <template v-if="users.length === 0">

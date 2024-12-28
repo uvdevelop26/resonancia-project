@@ -10,16 +10,15 @@ import { Utilities } from "@/js/Utilities";
 
 const route = useRoute();
 
-/*  values */
+//  variables reactivas 
 const ciudades = ref([]);
 const departamentos = ref([]);
 const message = ref("");
 const errors = ref({});
 const rol = ref({});
 
-/* form edit */
 const form = ref({
-  /* persona */
+  // persona 
   id: "",
   nombre: "",
   apellido: "",
@@ -31,7 +30,7 @@ const form = ref({
   edad: "",
   ciudad_id: "",
   departamento_id: "",
-  /* user */
+  // user 
   email: "",
   password: "",
   slug: "",
@@ -40,7 +39,7 @@ const form = ref({
   persona_id: "",
 });
 
-/* functions */
+// functions 
 
 const close = () => {
   Utilities.close(message);
@@ -51,7 +50,7 @@ const getSlug = () => {
   form.value.slug = slug;
 };
 
-/* update user */
+// update user 
 
 const update = async () => {
   const { slug } = route.params;

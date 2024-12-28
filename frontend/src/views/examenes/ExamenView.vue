@@ -1,50 +1,60 @@
 <script setup>
 import AppLayout from "@/components/layout/AppLayout.vue";
+import SearchInput from "@/components/SearchInput.vue";
 import Card from "@/components/Card.vue";
 import { Utilities } from "@/js/Utilities";
+import { Animations } from "@/js/Aminations";
 import User from "@/components/icons/User.vue";
 import { useRoute, useRouter } from "vue-router";
 import { Constants } from "@/js/Contants";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watchEffect } from "vue";
 import FlashMessage from "@/components/FlashMessage.vue";
 import axios from "axios";
 import gsap from "gsap";
 
+//rutas
 const route = useRoute();
 const router = useRouter();
+
+//variables reactivass
 const examenes = ref([]);
 const user = ref({});
 const message = ref("");
 const showDeleteSuccess = ref(false);
+const search = ref("");
+const examenesSearch = ref([]);
+const filteredExamenes = ref([]);
 
+//funciones
 const close = () => {
   Utilities.close(message);
   showDeleteSuccess.value = false;
 };
 
-const beforeEnter = (el) => {
-  el.style.transform = "translateY(60px)";
-  el.style.opacity = 0;
+watchEffect(() => {
+  const value = search.value;
+
+  if (value === "") {
+    filteredExamenes.value = examenes.value;
+  }
+});
+
+const action = () => {
+  const dni = Utilities.getDniFromString(search);
+
+  filteredExamenes.value = filteredExamenes.value.filter(
+    (fill) => fill.user.persona.dni === dni
+  );
 };
 
-const enter = (el, done) => {
-  gsap.to(el, {
-    duration: 0.6,
-    y: 0,
-    opacity: 1,
-    onComplete: done,
-    delay: el.dataset.index * 0.1,
-    ease: "power3.out",
-  });
-};
-
+//llamadas al backend
 const fetchData = async () => {
   try {
-    //user autenticado
+
     const userResponse = await axios.get(
       `${Constants.serverPath}/api/auth/userinfo`,
       {
-        withCredentials: true, // Para enviar cookies al backend
+        withCredentials: true, 
       }
     );
 
@@ -57,6 +67,21 @@ const fetchData = async () => {
 
     user.value = userResponse.data.user;
 
+    filteredExamenes.value = examenesResponse.data;
+
+    //filtra solo las personas para pasar al searchbar
+    examenesResponse.data.forEach((res) => {
+      const persona = res.user.persona;
+      const dni = persona.dni;
+
+      const exists = examenesSearch.value.some((p) => p.dni === dni);
+
+      if (!exists) {
+        examenesSearch.value.push(persona);
+      }
+    });
+
+    //filtra si el usuario es un paciente
     if (user.value.rol === "paciente") {
       examenes.value = examenesResponse.data.filter(
         (examene) => examene.user.id === user.value.id
@@ -94,7 +119,17 @@ onMounted(fetchData);
         />
         <div
           class="w-full flex justify-between gap-2 items-center mt-4 md:gap-8">
-          <!-- <SearchInput /> -->
+          <!-- search bar -->
+          <SearchInput
+            placeholder="Busca por nombre, apellido o CI. Selecciona en la lista"
+            id="search"
+            v-model="search"
+            :data="examenesSearch"
+            :criteria="['nombre', 'apellido', 'dni']"
+            @action="action"
+            background="bg-white"
+            maxWidth="3xl"
+          />
           <router-link
             to="/examenes/create"
             class="w-28 h-8 text-white font-bold bg-primary flex items-center justify-center rounded-lg shadow-lg hover:bg-primary-light hover:text-primary hover:border">
@@ -113,9 +148,11 @@ onMounted(fetchData);
           tag="div"
           class="flex flex-col gap-2 md:flex-row md:flex-wrap md:gap-6"
           appear
-          @before-enter="beforeEnter"
-          @enter="enter">
-          <template v-for="(examene, index) in examenes" :key="examene.id">
+          @before-enter="Animations.cardBeforeEnter"
+          @enter="Animations.cardEnter">
+          <template
+            v-for="(examene, index) in filteredExamenes"
+            :key="examene.id">
             <card :href="`/examenes/show/${examene.id}`" :data-index="index">
               <template #content>
                 <figure class="rounded-lg h-40 w-full overflow-hidden">

@@ -7,9 +7,9 @@ import axios from "axios";
 import { ref, onMounted } from "vue";
 import { Utilities } from "@/js/Utilities";
 
-/* create form */
+// variables reactivas
 const form = ref({
-  /* persona */
+  // persona 
   nombre: "",
   apellido: "",
   slug: "",
@@ -21,7 +21,7 @@ const form = ref({
   edad: "",
   ciudad_id: "",
   departamento_id: "",
-  /* user */
+  // user 
   email: "",
   password: "",
   confirmPassword: "",
@@ -35,7 +35,7 @@ const rol = ref("");
 const message = ref("");
 const errors = ref({});
 
-/* functios */
+// functios 
 const cleanForm = () => {
   Utilities.cleanForm(form);
 };
@@ -49,7 +49,7 @@ const close = () => {
   Utilities.close(message);
 };
 
-/* create new user */
+// create new user 
 const store = async () => {
   try {
     const response = await axios.post(
@@ -77,7 +77,7 @@ const store = async () => {
   }
 };
 
-/* Resquest data from the server */
+// Resquest data from the server 
 const fechData = async () => {
   try {
     const response = await axios.get(

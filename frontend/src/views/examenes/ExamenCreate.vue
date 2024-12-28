@@ -29,6 +29,7 @@ const form = ref({
   url: [],
 });
 
+//funciones
 const close = () => {
   Utilities.close(message);
 };
@@ -41,11 +42,7 @@ const cleanFormEx = () => {
 };
 
 const action = () => {
-  const value = search.value?.toLowerCase();
-
-  const parts = value.split(" ");
-
-  const dni = parts[parts.length - 1];
+  const dni = Utilities.getDniFromString(search);
 
   const user = pacientes.value.filter(
     (paciente) => paciente.persona.dni === dni
@@ -91,7 +88,6 @@ const handleRemoveImage = (index) => {
   photosPreview.value.splice(index, 1);
   fileNames.value.splice(index, 1);
   form.value.url.splice(index, 1);
-  //emit("update:modelValue", filesArray.value);
 };
 
 const store = async () => {
