@@ -1,6 +1,12 @@
+Este proyecto fue elaborado con la Ingeniera Andrea Rivero
+Quien realizó el entrenamiento del modelo keras, este modelo
+ha sido transformado a JSON para utilizarlo en el navegador
+pero no se encuentra en este repositorio por decisión de la
+Ingeniera.
+
 ## Pasos a Seguir
 
-En la carpeta de tu elección hacer click derecho y abrir Git Bush
+Ejecutar el siguiente comando para clonar el repositorio.
 
 ```
     git clone https://github.com/uvdevelop26/resonancia-project.git
